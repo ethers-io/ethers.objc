@@ -118,6 +118,7 @@
         
         [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
             XCTAssertNil(error, @"Timeout: %@", title);
+            _assertionCount++;
         }];
     }
 
@@ -133,6 +134,7 @@
                 BlockInfo *blockInfo = promise.value;
                 XCTAssertEqualObjects(blockInfo.blockHash, blockHash, @"BlockHash mismatch");
                 XCTAssertEqual(blockInfo.blockNumber, blockNumber, @"BlockNumber mismatch");
+                _assertionCount += 2;
                 checkBlock(blockInfo);
             }
             [expect fulfill];
@@ -140,6 +142,7 @@
         
         [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
             XCTAssertNil(error, @"Timeout: %@", title);
+            _assertionCount++;
         }];
     }
 }
@@ -158,6 +161,7 @@
             XCTAssertEqualObjects(blockInfo.extraData, extraData, @"ExtraData mismatch");
             XCTAssertEqualObjects(blockInfo.gasLimit, gasLimit, @"GasLimit mismatch");
             XCTAssertEqualObjects(blockInfo.gasUsed, gasUsed, @"GasUsed mismatch");
+            _assertionCount += 4;
         };
 
         Hash *blockHash = [Hash hashWithHexString:@"0x41800b5c3f1717687d85fc9018faac0a6e90b39deaa0b99e7fe4fe796ddeb26a"];
@@ -177,6 +181,8 @@
             XCTAssertEqualObjects(blockInfo.extraData, extraData, @"ExtraData mismatch");
             XCTAssertEqualObjects(blockInfo.gasLimit, gasLimit, @"GasLimit mismatch");
             XCTAssertEqualObjects(blockInfo.gasUsed, gasUsed, @"GasUsed mismatch");
+            
+            _assertionCount += 4;
         };
         
         Hash *blockHash = [Hash hashWithHexString:@"0xbf28f3c3f0caa79a74c7930ad649d13bf27224fa1e638a94128e316ef42932e5"];
