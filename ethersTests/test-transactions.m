@@ -64,35 +64,44 @@
         
         NSData *expectedUnsignedData = [(NSString*)[testCase objectForKey:@"unsignedTransaction"] dataUsingHexEncoding];
         NSData *expectedSignedData = [(NSString*)[testCase objectForKey:@"signedTransaction"] dataUsingHexEncoding];
-        
+
+        NSData *expectedSignedDataChainId5 = [(NSString*)[testCase objectForKey:@"signedTransactionChainId5"] dataUsingHexEncoding];
+
         Account *account = [Account accountWithPrivateKey:[(NSString*)[testCase objectForKey:@"privateKey"] dataUsingHexEncoding]];
         XCTAssertEqualObjects([account.address.checksumAddress lowercaseString], [[testCase objectForKey:@"accountAddress"] lowercaseString],
                               @"Failed account info: %@", name);
         _assertionCount++;
         
         Transaction *transaction = [[Transaction alloc] init];
+        Transaction *transactionChainId5 = [[Transaction alloc] init];
         if ([testCase objectForKey:@"nonce"]) {
-            transaction.nonce = strtoll([[testCase objectForKey:@"nonce"] cStringUsingEncoding:NSASCIIStringEncoding], NULL, 16);
+            transaction.nonce = (NSUInteger)strtoll([[testCase objectForKey:@"nonce"] cStringUsingEncoding:NSASCIIStringEncoding], NULL, 16);
+            transactionChainId5.nonce = transaction.nonce;
         }
         
         if ([testCase objectForKey:@"gasPrice"]) {
             transaction.gasPrice = [BigNumber bigNumberWithHexString:[testCase objectForKey:@"gasPrice"]];
+            transactionChainId5.gasPrice = transaction.gasPrice;
         }
 
         if ([testCase objectForKey:@"gasLimit"]) {
             transaction.gasLimit = [BigNumber bigNumberWithHexString:[testCase objectForKey:@"gasLimit"]];
+            transactionChainId5.gasLimit = transaction.gasLimit;
         }
 
         if ([testCase objectForKey:@"to"]) {
             transaction.toAddress = [Address addressWithString:[testCase objectForKey:@"to"]];
+            transactionChainId5.toAddress = transaction.toAddress;
         }
 
         if ([testCase objectForKey:@"value"]) {
             transaction.value = [BigNumber bigNumberWithHexString:[testCase objectForKey:@"value"]];
+            transactionChainId5.value = transaction.value;
         }
 
         if ([testCase objectForKey:@"data"]) {
             transaction.data = [(NSString*)[testCase objectForKey:@"data"] dataUsingHexEncoding];
+            transactionChainId5.data = transaction.data;
         }
 
         // Check the unsigned transaction
@@ -103,6 +112,13 @@
         [transaction sign:account];
         XCTAssertEqualObjects(expectedSignedData, [transaction serialize], @"Failed transaction signature: %@", name);
         _assertionCount++;
+        
+        // Sign the transaction and check the signed transaction (EIP 155)
+        transactionChainId5.chainId = 5;
+        [transactionChainId5 sign:account];
+        XCTAssertEqualObjects(expectedSignedDataChainId5, [transactionChainId5 serialize], @"Failed EIP155 transaction signature: %@", name);
+        _assertionCount++;
+
     }
 }
 

@@ -35,6 +35,11 @@ function addTransaction(privateKey, name, transaction, signature) {
     rawTransaction.sign(privateKey);
     test.signedTransaction = '0x' + rawTransaction.serialize().toString('hex');
 
+    var rawTransactionEip155 = new ethereumTx(transaction);
+    rawTransactionEip155._chainId = 5;
+    rawTransactionEip155.sign(privateKey);
+    test.signedTransactionChainId5 = '0x' + rawTransactionEip155.serialize().toString('hex');
+
     for (var k in transaction) {
         test[k] = transaction[k];
     }
@@ -42,6 +47,8 @@ function addTransaction(privateKey, name, transaction, signature) {
     for (var k in (signature || {})) {
         test[k] = signature[k];
     }
+
+
 
     Output.push(test);
 }
