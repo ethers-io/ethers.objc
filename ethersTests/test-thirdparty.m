@@ -72,8 +72,6 @@
         _assertionCount++;
     }
     
-    
-    
     NSArray *testCaseFail = @[
                               @"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon",
                               @"ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo ricmoo",

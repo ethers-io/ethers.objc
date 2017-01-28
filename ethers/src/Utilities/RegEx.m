@@ -25,13 +25,9 @@
 
 #import "RegEx.h"
 
-@interface RegEx () {
+@implementation RegEx {
     NSRegularExpression *_regex;
 }
-
-@end
-
-@implementation RegEx
 
 - (instancetype)initWithPattern: (NSString*)pattern {
     self = [super init];

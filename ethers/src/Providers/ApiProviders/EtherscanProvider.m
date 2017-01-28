@@ -67,18 +67,14 @@ NSString* queryifyTransaction(Transaction *transaction) {
 
 @end
 
+#pragma mark -
+#pragma mark - EtherscanProvider
 
-@interface EtherscanProvider () {
-//    float _etherPrice;
+@implementation EtherscanProvider {
     NSTimer *_poller;
     
     FloatPromise *_etherPricePromise;
 }
-
-@end
-
-
-@implementation EtherscanProvider
 
 
 #pragma mark - Life-Cycle

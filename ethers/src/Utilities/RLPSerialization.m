@@ -58,7 +58,6 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
 }
 
 + (NSData*)dataWithObject:(NSObject *)object error:(NSError *__autoreleasing *)error {
-//+ (NSData*)encode: (NSObject*)object {
     if ([object isKindOfClass:[NSData class]]) {
         NSData *data = (NSData*)object;
         
@@ -129,7 +128,6 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
 }
 
 + (NSObject*)_decode: (NSData*)data offset: (NSUInteger)offset consumed: (NSInteger*)consumed {
-//    NSLog(@"DEC: %@ %ld", data, offset);
     
     if (data.length == 0) { return nil; }
     

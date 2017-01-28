@@ -1,17 +1,12 @@
 #import "EtherchainProvider.h"
 
 #import "JsonRpcProvider.h"
-
 #import "NSString+Secure.h"
 
 
-@interface EtherchainProvider () {
+@implementation EtherchainProvider {
     NSUInteger _requestCount;
 }
-
-@end
-
-@implementation EtherchainProvider
 
 + (Provider*)jsonRpcProviderWithTestnet: (BOOL)testnet {
     return [[JsonRpcProvider alloc] initWithTestnet:testnet url:[NSURL URLWithString:@"https://rpc.ethapi.org"]];

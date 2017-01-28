@@ -83,16 +83,23 @@ NSData *ensureDataLength(NSString *hexString, NSUInteger length) {
 #pragma mark -
 #pragma mark - Cancellable
 
-@interface Cancellable () {
-    BOOL _cancelled;
-}
-
-@property (nonatomic, copy) void (^cancelCallback)();
+@interface Cancellable ()
 
 @end
 
 
-@implementation Cancellable
+@implementation Cancellable {
+    BOOL _cancelled;
+    void (^_cancelCallback)();
+}
+
+- (instancetype)initWithCancelCallback: (void (^)())cancelCallback {
+    self = [super init];
+    if (self) {
+        _cancelCallback = cancelCallback;
+    }
+    return self;
+}
 
 - (void)cancel {
     if (!_cancelled && _cancelCallback) {
@@ -301,10 +308,9 @@ static NSMutableSet *Wordlist = nil;
 
     __block char stop = 0;
     
-    Cancellable *cancellable = [[Cancellable alloc] init];
-    cancellable.cancelCallback = ^() {
+    Cancellable *cancellable = [[Cancellable alloc] initWithCancelCallback:^() {
         stop = 1;
-    };
+    }];
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^() {
         // Get the key to encrypt with from the password and salt
@@ -482,10 +488,9 @@ static NSMutableSet *Wordlist = nil;
 
     __block char stop = 0;
     
-    Cancellable *cancellable = [[Cancellable alloc] init];
-    cancellable.cancelCallback = ^() {
+    Cancellable *cancellable = [[Cancellable alloc] initWithCancelCallback:^() {
         stop = 1;
-    };
+    }];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^() {
         

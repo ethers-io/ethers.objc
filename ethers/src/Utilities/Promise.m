@@ -29,16 +29,10 @@
 NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
 
 
-@interface Promise () {
+@implementation Promise {
     NSMutableArray<void (^)(Promise*)> *_completionCallbacks;
+    Promise *_keepAlive;
 }
-
-@property (nonatomic, strong) Promise *keepAlive;
-
-@end
-
-
-@implementation Promise
 
 + (instancetype)promiseWithSetup:(void (^)(Promise *))setupCallback {
     return [[self alloc] initWithSetup:setupCallback];
@@ -52,7 +46,7 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
         _completionCallbacks = [NSMutableArray array];
         setupCallback(self);
         
-        self.keepAlive = self;
+        _keepAlive = self;
     }
     
     return self;
@@ -68,8 +62,8 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
     }
     
     _completionCallbacks = nil;
-    
-    self.keepAlive = nil;
+
+    _keepAlive = nil;
 }
 
 - (void)resolve: (NSObject*)result {

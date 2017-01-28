@@ -37,15 +37,11 @@
 #pragma mark -
 #pragma mark - JsonRpcProvider
 
-@interface JsonRpcProvider () {
+@implementation JsonRpcProvider {
     NSUInteger _requestCount;
     NSTimer *_poller;
 }
 
-@end
-
-
-@implementation JsonRpcProvider
 
 - (instancetype)initWithTestnet:(BOOL)testnet url:(NSURL *)url {
     self = [super initWithTestnet:testnet];

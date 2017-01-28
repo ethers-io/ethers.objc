@@ -88,6 +88,7 @@ BOOL containLowerCase(NSString *text) {
     return ([HexLowerCase firstMatchInString:text options:0 range:NSMakeRange(0, text.length)] != nil);
 }
 
+
 @implementation Address
 
 + (NSString*)_checksumAddressData: (NSData*)addressData {

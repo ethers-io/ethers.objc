@@ -32,14 +32,9 @@
 #import "NSString+Secure.h"
 #import "NSData+Secure.h"
 
-@interface BigNumber () {
+@implementation BigNumber {
     mp_int _bigNumber;
 }
-
-@end
-
-@implementation BigNumber
-
 
 #pragma mark - Life-Cycle
 

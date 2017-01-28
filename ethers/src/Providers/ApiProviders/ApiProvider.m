@@ -312,16 +312,15 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
 }
 
 
-@interface ApiProvider () {
+#pragma mark -
+#pragma mark - ApiProvider
+
+@implementation ApiProvider {
     NSTimer *_statsTimer;
     NSTimeInterval _startTime;
-
+    
     NSUInteger _requestCount;
 }
-
-@end
-
-@implementation ApiProvider
 
 - (instancetype)initWithTestnet:(BOOL)testnet {
     self = [super initWithTestnet:testnet];

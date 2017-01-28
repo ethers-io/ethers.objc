@@ -33,15 +33,12 @@
 
 @end
 
+#pragma mark -
+#pragma mark - FallbackProvider
 
-@interface FallbackProvider () {
+@implementation FallbackProvider {
     NSArray<Provider*> *_orderedProviders;
 }
-
-@end
-
-
-@implementation FallbackProvider
 
 - (instancetype)initWithTestnet:(BOOL)testnet {
     self = [super initWithTestnet:testnet];

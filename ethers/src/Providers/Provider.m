@@ -23,7 +23,6 @@
  *  DEALINGS IN THE SOFTWARE.
  */
 
-//#import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
 #import "Provider.h"
@@ -40,8 +39,6 @@ NSString *getBlockTag(BlockTag blockTag) {
         default:
             if (blockTag >= 0) {
                 return [[BigNumber bigNumberWithInteger:blockTag] hexString];
-//                return [NSNumber numberWithLong:blockTag];
-//                return [NSString stringWithFormat:@"%ld", (unsigned long)blockTag];
             }
             break;
     }
@@ -60,17 +57,13 @@ const NSNotificationName ProviderEtherPriceChangedNotification = @"ProviderEther
 
 NSErrorDomain ProviderErrorDomain = @"ProviderErrorDomain";
 
-#pragma mark -
 
-@interface Provider () {
+#pragma mark - Provider
+
+@implementation Provider {
     NSInteger _blockNumber;
     float _etherPrice;
 }
-
-@end
-
-
-@implementation Provider
 
 #pragma mark - Life-Cycle
 //+ (void)setUserInfoValueProviderForDomain:(NSErrorDomain)errorDomain provider:(id _Nullable (^ _Nullable)(NSError *err, NSString *userInfoKey))provider NS_AVAILABLE(10_11, 9_0);
