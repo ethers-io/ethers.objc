@@ -1,0 +1,17 @@
+{
+  "name": "tests",
+  "version": "0.0.1",
+  "description": "Test case generation for ethers.io iOS Application.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ethereumjs-tx": "1.1.1",
+    "ethereumjs-util": "4.3.0",
+    "rlp": "2.0.0",
+    "web3": "0.15.3"
+  },
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT"
+}
