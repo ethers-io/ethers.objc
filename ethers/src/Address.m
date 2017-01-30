@@ -89,7 +89,19 @@ BOOL containLowerCase(NSString *text) {
 }
 
 
+
 @implementation Address
+
+static Address *ZeroAddress = nil;
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        unsigned char nullBytes[20];
+        memset(nullBytes, 0, sizeof(nullBytes));
+        ZeroAddress = [Address addressWithData:[NSData dataWithBytes:nullBytes length:sizeof(nullBytes)]];
+    });
+}
 
 + (NSString*)_checksumAddressData: (NSData*)addressData {
     if (addressData.length != 20) { return nil; }
@@ -204,9 +216,16 @@ BOOL containLowerCase(NSString *text) {
     return [[Address alloc] initWithString:[addressData hexEncodedString]];
 }
 
++ (Address*)zeroAddress {
+    return ZeroAddress;
+}
 
 - (NSString*)icapAddress {
     return [Address normalizeAddress:_checksumAddress icap:YES];
+}
+
+- (BOOL)isZeroAddress {
+    return [self isEqualToAddress:ZeroAddress];
 }
 
 - (NSData*)data {

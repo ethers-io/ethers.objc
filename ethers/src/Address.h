@@ -40,6 +40,8 @@
 
 @interface Address : NSObject <NSCoding, NSCopying>
 
++ (Address*)zeroAddress;
+
 + (instancetype)addressWithString: (NSString*)addressString;
 + (instancetype)addressWithData: (NSData*)addressData;
 
@@ -49,5 +51,7 @@
 @property (nonatomic, readonly) NSData *data;
 
 - (BOOL)isEqualToAddress: (Address*)address;
+
+- (BOOL)isZeroAddress;
 
 @end

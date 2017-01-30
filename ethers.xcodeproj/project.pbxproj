@@ -289,14 +289,14 @@
 			isa = PBXGroup;
 			children = (
 				E2317F631E31A08800DBE3E4 /* test-cases */,
-				E2317F551E31A07700DBE3E4 /* test-providers.m */,
+				E2317E731E3191AC00DBE3E4 /* Info.plist */,
 				E2317F561E31A07700DBE3E4 /* test-accounts.m */,
-				E2317F571E31A07700DBE3E4 /* test-rlpcoder.m */,
 				E2317F581E31A07700DBE3E4 /* test-ether-format.m */,
 				E2317F591E31A07700DBE3E4 /* test-mnemonic-wallet.m */,
+				E2317F551E31A07700DBE3E4 /* test-providers.m */,
+				E2317F571E31A07700DBE3E4 /* test-rlpcoder.m */,
 				E2317F5A1E31A07700DBE3E4 /* test-thirdparty.m */,
 				E2317F5B1E31A07700DBE3E4 /* test-transactions.m */,
-				E2317E731E3191AC00DBE3E4 /* Info.plist */,
 			);
 			path = ethersTests;
 			sourceTree = "<group>";
