@@ -37,7 +37,7 @@
 
 NSMutableDictionary *transactionObject(Transaction *transaction);
 
-typedef enum ApiProviderFetchType {
+typedef NS_OPTIONS(NSUInteger, ApiProviderFetchType) {
     ApiProviderFetchTypeNil,
     
     ApiProviderFetchTypeObject,
@@ -63,7 +63,7 @@ typedef enum ApiProviderFetchType {
     ApiProviderFetchTypeAddress,
     ApiProviderFetchTypeData,
     ApiProviderFetchTypeHash,
-} ApiProviderFetchType;
+};
 
 
 Class getPromiseClass(ApiProviderFetchType fetchType);

@@ -28,11 +28,11 @@
 #import "Address.h"
 #import "BigNumber.h"
 
-typedef enum EtherFormatOption {
+typedef NS_OPTIONS(NSUInteger, EtherFormatOption) {
     EtherFormatOptionNone         = 0,
     EtherFormatOptionCommify      = (1 << 0),
     EtherFormatOptionApproximate  = (1 << 1)
-} EtherFormatOption;
+};
 
 
 
