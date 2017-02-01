@@ -109,13 +109,13 @@
         _assertionCount++;
 
         // Sign the transaction and check the signed transaction
-        [transaction sign:account];
+        [account sign:transaction];
         XCTAssertEqualObjects(expectedSignedData, [transaction serialize], @"Failed transaction signature: %@", name);
         _assertionCount++;
         
         // Sign the transaction and check the signed transaction (EIP 155)
         transactionChainId5.chainId = 5;
-        [transactionChainId5 sign:account];
+        [account sign:transactionChainId5];
         XCTAssertEqualObjects(expectedSignedDataChainId5, [transactionChainId5 serialize], @"Failed EIP155 transaction signature: %@", name);
         _assertionCount++;
 

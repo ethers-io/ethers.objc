@@ -35,6 +35,8 @@
 #import <Foundation/Foundation.h>
 
 #import "Address.h"
+#import "Signature.h"
+#import "Transaction.h"
 
 
 #pragma mark - Errors
@@ -53,18 +55,6 @@
 #define kAccountErrorCancelled                               -20
 
 #define kAccountErrorUnknownError                            -50
-
-
-#pragma mark -
-#pragma mark - Signature
-
-@interface Signature: NSObject
-
-@property (nonatomic, readonly) NSData* r;
-@property (nonatomic, readonly) NSData* s;
-@property (nonatomic, readonly) char v;
-
-@end
 
 
 #pragma mark -
@@ -107,6 +97,7 @@
 @property (nonatomic, readonly) NSData *mnemonicData;
 
 - (Signature*)signDigest: (NSData*)digestData;
+- (void)sign: (Transaction*)transaction;
 
 + (BOOL)isValidMnemonicPhrase: (NSString*)phrase;
 + (BOOL)isValidMnemonicWord: (NSString*)word;

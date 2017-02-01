@@ -111,24 +111,20 @@ NSData *ensureDataLength(NSString *hexString, NSUInteger length) {
 @end
 
 
-
 #pragma mark -
 #pragma mark - Signature
 
-@implementation Signature
+@interface Signature (private)
 
-- (instancetype)initWithData: (NSData*)data recoveryParam: (char)recoveryParam {
-    self = [super init];
-    if (self) {
-        _r = [data subdataWithRange:NSMakeRange(0, 32)];
-        _s = [data subdataWithRange:NSMakeRange(32, 32)];
-        _v = recoveryParam;
-    }
-    return self;
-}
++ (instancetype)signatureWithData: (NSData*)data v: (char)v;
 
 @end
 
+@interface Transaction (private_sign)
+
+- (void)sign:(Account *)account;
+
+@end
 
 
 #pragma mark -
@@ -223,9 +219,16 @@ static NSMutableSet *Wordlist = nil;
     return [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:phrase encoding:NSUTF8StringEncoding]];
 }
 
+#define MNEMONIC_STRENGTH    (128 / 8)
+
 + (instancetype)randomMnemonicAccount {
-    const char* phrase = mnemonic_generate(128);
-    return [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:phrase encoding:NSUTF8StringEncoding]];
+    NSMutableData* data = [NSMutableData secureDataWithLength:MNEMONIC_STRENGTH];
+    int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
+    if (result != noErr) { return nil; }
+
+    Account *account = [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:mnemonic_from_data(data.bytes, data.length)
+                                                                                  encoding:NSUTF8StringEncoding]];    
+    return account;
 }
 
 - (NSString*)_privateKeyHash {
@@ -596,7 +599,11 @@ static NSMutableSet *Wordlist = nil;
     NSMutableData *signatureData = [NSMutableData secureDataWithLength:64];;
     uint8_t pby;
     ecdsa_sign_digest(&secp256k1, [_privateKey bytes], [digestData bytes], [signatureData mutableBytes], &pby, NULL);
-    return [[Signature alloc] initWithData:signatureData recoveryParam:pby];
+    return [Signature signatureWithData:signatureData v:pby];
+}
+
+- (void)sign: (Transaction*)transaction {
+    [transaction sign:self];
 }
 
 #pragma mark - Mnemonic Helpers

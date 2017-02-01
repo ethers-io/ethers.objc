@@ -25,13 +25,33 @@
 
 #import <Foundation/Foundation.h>
 
-#import "Account.h"
 #import "Address.h"
 #import "BigNumber.h"
+#import "Signature.h"
 
+
+/**
+ *  Chain ID
+ *
+ *  As of EIP155, the chain ID can be used when signing requests to protect from
+ *  replay attacks on other networks. This alters the internal structure of the
+ *  payload that is hashed before signing the digest, so ChainIdAny is provided
+ *  to continue using the legacy method of signing, but this also means the
+ *  transaction is not safe against replays.
+ *
+ *  Note: ChainIdAny is NOT recommended
+ *
+ *  See: https://github.com/ethereum/EIPs/issues/155
+ */
+
+typedef NS_OPTIONS(unsigned char, ChainId)  {
+    ChianIdAny          = 0x00,
+    ChainIdHomestead    = 0x01,
+    ChainIdMorden       = 0x02,
+    ChainIdRopsten      = 0x03,
+};
 
 //typedef unsigned long long Nonce;
-
 
 @interface Transaction : NSObject
 
@@ -53,12 +73,7 @@
 
 @property (nonatomic, readonly) Address *fromAddress;
 
-@property (nonatomic, assign) uint8_t chainId;
-
-//- (BOOL)isValidTransaction;
-
-- (void)sign: (Account*)account;
-//- (BOOL)verify;
+@property (nonatomic, assign) ChainId chainId;
 
 - (NSData*)serialize;
 

@@ -44,16 +44,6 @@ static NSData *NullData = nil;
 
 
 #pragma mark -
-#pragma mark - Signature (private)
-
-@interface Signature ()
-
-- (instancetype)initWithData: (NSData*)data recoveryParam: (char)recoveryParam;
-
-@end
-
-
-#pragma mark -
 #pragma mark - Transaction
 
 @implementation Transaction
