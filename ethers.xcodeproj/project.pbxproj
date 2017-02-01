@@ -112,6 +112,9 @@
 		E2317F691E31A09F00DBE3E4 /* tests-accounts.json in Resources */ = {isa = PBXBuildFile; fileRef = E2317F651E31A09F00DBE3E4 /* tests-accounts.json */; };
 		E2317F6A1E31A09F00DBE3E4 /* tests-rlpcoder.json in Resources */ = {isa = PBXBuildFile; fileRef = E2317F661E31A09F00DBE3E4 /* tests-rlpcoder.json */; };
 		E2317F6B1E31A09F00DBE3E4 /* tests-trezor-bip39.json in Resources */ = {isa = PBXBuildFile; fileRef = E2317F671E31A09F00DBE3E4 /* tests-trezor-bip39.json */; };
+		E2FA03D21E406FB30013E5A7 /* Signature.h in Headers */ = {isa = PBXBuildFile; fileRef = E2FA03D01E406FB30013E5A7 /* Signature.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E2FA03D31E406FB30013E5A7 /* Signature.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA03D11E406FB30013E5A7 /* Signature.m */; };
+		E2FA03D71E4096560013E5A7 /* test-entropy.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA03D61E4096560013E5A7 /* test-entropy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -235,6 +238,9 @@
 		E2317F651E31A09F00DBE3E4 /* tests-accounts.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "tests-accounts.json"; path = "test-cases/tests-accounts.json"; sourceTree = "<group>"; };
 		E2317F661E31A09F00DBE3E4 /* tests-rlpcoder.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "tests-rlpcoder.json"; path = "test-cases/tests-rlpcoder.json"; sourceTree = "<group>"; };
 		E2317F671E31A09F00DBE3E4 /* tests-trezor-bip39.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "tests-trezor-bip39.json"; path = "test-cases/tests-trezor-bip39.json"; sourceTree = "<group>"; };
+		E2FA03D01E406FB30013E5A7 /* Signature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Signature.h; path = src/Signature.h; sourceTree = "<group>"; };
+		E2FA03D11E406FB30013E5A7 /* Signature.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Signature.m; path = src/Signature.m; sourceTree = "<group>"; };
+		E2FA03D61E4096560013E5A7 /* test-entropy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "test-entropy.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -291,6 +297,7 @@
 				E2317F631E31A08800DBE3E4 /* test-cases */,
 				E2317E731E3191AC00DBE3E4 /* Info.plist */,
 				E2317F561E31A07700DBE3E4 /* test-accounts.m */,
+				E2FA03D61E4096560013E5A7 /* test-entropy.m */,
 				E2317F581E31A07700DBE3E4 /* test-ether-format.m */,
 				E2317F591E31A07700DBE3E4 /* test-mnemonic-wallet.m */,
 				E2317F551E31A07700DBE3E4 /* test-providers.m */,
@@ -468,6 +475,8 @@
 				E2317E8A1E31970900DBE3E4 /* Hash.m */,
 				E2317E7D1E31970900DBE3E4 /* Payment.h */,
 				E2317E7E1E31970900DBE3E4 /* Payment.m */,
+				E2FA03D01E406FB30013E5A7 /* Signature.h */,
+				E2FA03D11E406FB30013E5A7 /* Signature.m */,
 				E2317E8D1E31970900DBE3E4 /* Transaction.h */,
 				E2317E8E1E31970900DBE3E4 /* Transaction.m */,
 				E2317E831E31970900DBE3E4 /* TransactionInfo.h */,
@@ -502,6 +511,7 @@
 				E2317E9D1E31970900DBE3E4 /* BlockInfo.h in Headers */,
 				E2317F441E3199AD00DBE3E4 /* NSMutableData+Secure.h in Headers */,
 				E2317F451E3199AD00DBE3E4 /* NSString+Secure.h in Headers */,
+				E2FA03D21E406FB30013E5A7 /* Signature.h in Headers */,
 				E2317F431E3199AD00DBE3E4 /* NSData+Secure.h in Headers */,
 				E2317E931E31970900DBE3E4 /* Payment.h in Headers */,
 				E2317EDC1E31988900DBE3E4 /* EtherchainProvider.h in Headers */,
@@ -641,6 +651,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E2FA03D31E406FB30013E5A7 /* Signature.m in Sources */,
 				E2317ECB1E31987F00DBE3E4 /* Provider.m in Sources */,
 				E2317F191E31994500DBE3E4 /* aescrypt.c in Sources */,
 				E2317EB51E31981D00DBE3E4 /* RegEx.m in Sources */,
@@ -697,6 +708,7 @@
 				E2317F5D1E31A07700DBE3E4 /* test-accounts.m in Sources */,
 				E2317F5F1E31A07700DBE3E4 /* test-ether-format.m in Sources */,
 				E2317F611E31A07700DBE3E4 /* test-thirdparty.m in Sources */,
+				E2FA03D71E4096560013E5A7 /* test-entropy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
