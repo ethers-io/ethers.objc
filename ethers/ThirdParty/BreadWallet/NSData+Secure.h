@@ -24,7 +24,6 @@
 //  THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import <CommonCrypto/CommonDigest.h>
 
 
 @interface NSData (Secure)
