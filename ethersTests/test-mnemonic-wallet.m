@@ -46,6 +46,62 @@
     NSLog(@"test-mnemonic-wallet: Finished %d assertions.", _assertionCount);
 }
 
+- (XCTestExpectation*)doTestUtf8Equivalence: (NSString*)title fromPassword: (NSString*)fromPassword toPassword: (NSString*)toPassword {
+    XCTestExpectation *expect = [self expectationWithDescription:[NSString stringWithFormat:@"<UTF8Test %@ => %@>", fromPassword, toPassword]];
+
+    Account *account = [Account randomMnemonicAccount];
+    [account encryptSecretStorageJSON:fromPassword callback:^(NSString *json) {
+        [Account decryptSecretStorageJSON:json password:toPassword callback:^(Account *decryptedAccount, NSError *error) {
+            XCTAssertNil(error, @"Error: %@", error);
+            _assertionCount++;
+            
+            if (![account.address isEqual:decryptedAccount.address]) {
+                NSLog(@"Failed: %@", title);
+            }
+            XCTAssertEqualObjects(account.address, decryptedAccount.address, @"Failed to encrypt/decrypt UTF8 equivalent wallet");
+            _assertionCount++;
+
+            [expect fulfill];
+        }];
+    }];
+    
+    return expect;
+}
+
+- (void)testUtf8Equivalence {
+    NSMutableArray *expectations = [NSMutableArray array];
+    
+    // UTF-8 Equivalence
+    //
+    // u-umlaut composed:      \u00fc
+    // u-umlaut decomposed:    u\u0308
+    // capital I:              I
+    // Roman numeral 1 (I):    \u2160
+    //
+    // See: https://github.com/ricmoo/scrypt-js#encoding-notes
+    
+    // Test Composed vs decomposed mode
+    [expectations addObject:[self doTestUtf8Equivalence:@"composedToDecomposed"
+                                           fromPassword:@"\u00fc" toPassword:@"u\u0308"]];
+    [expectations addObject:[self doTestUtf8Equivalence: @"decomposedToComposed"
+                                           fromPassword:@"u\u0308" toPassword:@"\u00fc"]];
+    
+    // Test compatibility equivalence mode
+    [expectations addObject:[self doTestUtf8Equivalence: @"toCompatibility"
+                                           fromPassword:@"I" toPassword:@"\u2160"]];
+    [expectations addObject:[self doTestUtf8Equivalence: @"fromCompatibility"
+                                           fromPassword:@"\u2160" toPassword:@"I"]];
+
+    // Test mixture of both
+    [expectations addObject:[self doTestUtf8Equivalence: @"mixture" fromPassword:@"\u00fcu\u0308I\u2160"
+                                             toPassword:@"u\u0308\u00fc\u2160I"]];
+
+    [self waitForExpectationsWithTimeout:60.0f handler:^(NSError *error) {
+        XCTAssertNil(error, @"Timeout: %@", expectations);
+        _assertionCount++;
+    }];
+}
+
 - (void)testTestVectors {
     // Load the test cases generated from BIP test vectors
     NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"tests-trezor-bip39" ofType:@"json"];
