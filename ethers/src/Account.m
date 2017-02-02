@@ -35,7 +35,6 @@
 #include "secp256k1.h"
 
 #import "BigNumber.h"
-#import "RegEx.h"
 #import "SecureData.h"
 
 static NSErrorDomain ErrorDomain = @"io.ethers.AccountError";
@@ -162,7 +161,7 @@ static NSMutableSet *Wordlist = nil;
         
         SecureData *publicKey = [SecureData secureDataWithLength:65];
         ecdsa_get_public_key65(&secp256k1, _privateKey.bytes, publicKey.mutableBytes);
-        NSData *addressData = [[[publicKey subdataWithRange:NSMakeRange(1, 64)] KECCAK256] subdataWithRange:NSMakeRange(12, 20)].data;
+        NSData *addressData = [[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data;
         _address = [Address addressWithData:addressData];
     }
     return self;
@@ -223,9 +222,8 @@ static NSMutableSet *Wordlist = nil;
     int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
     if (result != noErr) { return nil; }
 
-    Account *account = [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:mnemonic_from_data(data.bytes, (int)data.length)
-                                                                                  encoding:NSUTF8StringEncoding]];    
-    return account;
+    NSString *mnemonicPhrase = [NSString stringWithCString:mnemonic_from_data(data.bytes, (int)data.length) encoding:NSUTF8StringEncoding];
+    return [[Account alloc] initWithMnemonicPhrase:mnemonicPhrase];
 }
 
 - (NSString*)_privateKeyHash {
@@ -508,7 +506,6 @@ static NSMutableSet *Wordlist = nil;
         {
             unsigned char counter[16];
             memcpy(counter, iv.bytes, MIN(iv.length, sizeof(counter)));
-//            [iv getBytes:counter length:iv.length];
 
             SecureData *encryptionKey = [derivedKey subdataWithRange:NSMakeRange(0, 16)];
             
@@ -545,7 +542,6 @@ static NSMutableSet *Wordlist = nil;
             // We are using a different key, so it is safe to use the same IV
             unsigned char counter[16];
             memcpy(counter, mnemonicCounter.bytes, MIN(mnemonicCounter.length, sizeof(counter)));
-//            [mnemonicCounter getBytes:counter length:mnemonicCounter.length];
             
             aes_encrypt_ctx context;
             aes_encrypt_key256([derivedKey subdataWithRange:NSMakeRange(32, 32)].bytes, &context);

@@ -31,6 +31,7 @@
 #include "ccMemory.h"
 #include "sha3.h"
 
+#import "RegEx.h"
 
 #pragma mark - Secure Allocator
 
@@ -107,6 +108,15 @@ CFAllocatorRef SecureAllocator() {
 
 #pragma mark - Life Cycle
 
+static RegEx *RegExHex = nil;
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        RegExHex = [RegEx regExWithPattern:@"^0x([0-9A-Fa-f][0-9A-Fa-f])*$"];
+    });
+}
+
 - (instancetype)init {
     return [self initWithCapacity:0];
 }
@@ -143,32 +153,17 @@ CFAllocatorRef SecureAllocator() {
 }
 
 + (instancetype)secureDataWithHexString:(NSString*)hexString {
-    static NSRegularExpression *hexStringRegex = nil;
-    
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSError *error = nil;
-        hexStringRegex = [[NSRegularExpression alloc] initWithPattern:@"^0x([0-9A-Fa-f][0-9A-Fa-f])*$" options:0 error:&error];
-        if (error) {
-            NSLog(@"Error Compiling Regular Expression");
-        }
-    });
     
     // Make sure we are a valid hex string
-    // @TODO: USe this?
-    //NSRange fullRange = NSMakeRange(0, hexString.length);
-    //if ([hexStringRegex rangeOfFirstMatchInString:hexString options:0 range:fullRange])
+    if (![RegExHex matchesExactly:hexString]) { return nil; }
     
-    if ([hexStringRegex matchesInString:hexString options:0 range:NSMakeRange(0, hexString.length)].count != 1) {
-        return nil;
-    }
-    
-    SecureData *secureData = [SecureData secureDataWithCapacity:hexString.length / 2];
+    SecureData *secureData = [SecureData secureDataWithCapacity:hexString.length / 2 - 1];
 
     uint8_t b = 0;
+    unichar c;
     
     for (NSUInteger i = 2; i < hexString.length; i++) {
-        unichar c = [hexString characterAtIndex:i];
+        c = [hexString characterAtIndex:i];
         
         switch (c) {
             case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -189,18 +184,17 @@ CFAllocatorRef SecureAllocator() {
                 return nil;
         }
         
-        // @TODO: Move this outside the loop?
-        CC_XZEROMEM(&c, sizeof(c));
-        
         if (i % 2) {
             [secureData.secureData appendBytes:&b length:1];
-            // @TODO: Ditto; just use assign to 0?
-            CC_XZEROMEM(&b, sizeof(b));
+            b = 0;
         } else {
             b <<= 4;
         }
     }
-    
+
+    b = 0;
+    CC_XZEROMEM(&c, sizeof(c));
+
     return secureData;
 }
 

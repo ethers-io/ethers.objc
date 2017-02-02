@@ -69,36 +69,26 @@ int ibanChecksum(NSString *address) {
     return 98 - (int)checksum;
 }
 
-BOOL containUpperCase(NSString *text) {
-    static NSRegularExpression *HexUpperCase = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        HexUpperCase = [[NSRegularExpression alloc] initWithPattern:@"[A-F]" options:0 error:nil];
-    });
-    return ([HexUpperCase firstMatchInString:text options:0 range:NSMakeRange(0, text.length)] != nil);
-}
-
-BOOL containLowerCase(NSString *text) {
-    static NSRegularExpression *HexLowerCase = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        HexLowerCase = [[NSRegularExpression alloc] initWithPattern:@"[a-f]" options:0 error:nil];
-    });
-    return ([HexLowerCase firstMatchInString:text options:0 range:NSMakeRange(0, text.length)] != nil);
-}
-
-
 
 @implementation Address
 
 static Address *ZeroAddress = nil;
 
+static RegEx *HexAddressRegex = nil;
+static RegEx *IcapAddressRegex = nil;
+static RegEx *MixedCaseAddressRegex = nil;
+
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        HexAddressRegex = [RegEx regExWithPattern:@"^(0x)?[0-9A-Fa-f]{40}$"];
+        IcapAddressRegex = [RegEx regExWithPattern:@"^XE[0-9]{2}[0-9A-Za-z]{30,31}$"];
+        MixedCaseAddressRegex = [RegEx regExWithPattern:@"^.*(([A-F].*[a-f])|([a-f].*[A-F])).*$"];
+
         unsigned char nullBytes[20];
         memset(nullBytes, 0, sizeof(nullBytes));
         ZeroAddress = [Address addressWithData:[NSData dataWithBytes:nullBytes length:sizeof(nullBytes)]];
+        
     });
 }
 
@@ -140,19 +130,10 @@ static Address *ZeroAddress = nil;
 
 + (NSString*)normalizeAddress:(NSString *)address icap:(BOOL)icapFormat {
     if (!address) { return nil; }
-    
-    static RegEx *hexAddressRegex = nil;
-    static RegEx *icapAddressRegex = nil;
-    
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        hexAddressRegex = [RegEx regExWithPattern:@"^(0x)?[0-9A-Fa-f]{40}$"];
-        icapAddressRegex = [RegEx regExWithPattern:@"^XE[0-9]{2}[0-9A-Za-z]{30,31}$"];
-    });
-    
+
     NSString *result = nil;
     
-    if ([hexAddressRegex matchesExactly:address]) {
+    if ([HexAddressRegex matchesExactly:address]) {
         
         // Add the 0x prefix if not present
         if (![address hasPrefix:@"0x"]) {
@@ -163,7 +144,7 @@ static Address *ZeroAddress = nil;
         NSString *checksumAddress = [Address _checksumAddressData:[SecureData hexStringToData:address]];
         
         // If this address is checksummed, fail if the checksum if wrong
-        if (containLowerCase(address) && containUpperCase(address)) {
+        if ([MixedCaseAddressRegex matchesExactly:address]) {
             if (![checksumAddress isEqualToString:address]) {
                 return nil;
             }
@@ -171,7 +152,7 @@ static Address *ZeroAddress = nil;
         
         result = checksumAddress;
         
-    } else if ([icapAddressRegex matchesExactly:address]) {
+    } else if ([IcapAddressRegex matchesExactly:address]) {
         
         int checksum = ibanChecksum(address);
         if ([[address substringWithRange:NSMakeRange(2, 2)] integerValue] != checksum) {

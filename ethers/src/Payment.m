@@ -30,6 +30,15 @@
 
 @implementation Payment
 
+static RegEx *RegexNumbersOnly = nil;
+
++ (void)initialize {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        RegexNumbersOnly = [RegEx regExWithPattern:@"^[0-9]*$"];
+    });
+}
+
 + (instancetype)paymentWithURI:(NSString *)uri {
     return [[Payment alloc] initWithURI:uri];
 }
@@ -144,13 +153,6 @@
 }
 
 + (BigNumber*)parseEther: (NSString*)etherString {
-    static RegEx *regexNumbersOnly = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        regexNumbersOnly = [RegEx regExWithPattern:@"^[0-9]*$"];
-    });
-    
-    
     if ([etherString isEqualToString:@"."]) { return nil; }
     
     BOOL negative = NO;
@@ -166,11 +168,11 @@
     
     NSString *whole = [parts objectAtIndex:0];
     if (whole.length == 0) { whole = @"0"; }
-    if (![regexNumbersOnly matchesExactly:whole]) { return nil; }
+    if (![RegexNumbersOnly matchesExactly:whole]) { return nil; }
     
     NSString *decimal = ([parts count] > 1) ? [parts objectAtIndex:1]: @"0";
     if (!decimal || decimal.length == 0) { decimal = @"0"; }
-    if (![regexNumbersOnly matchesExactly:decimal]) { return nil; }
+    if (![RegexNumbersOnly matchesExactly:decimal]) { return nil; }
     
     if (decimal.length > 18) { return nil; }
     while (decimal.length < 18) { decimal = [decimal stringByAppendingString:@"0"]; }

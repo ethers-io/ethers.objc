@@ -32,12 +32,6 @@
 #import "SecureData.h"
 
 
-@implementation BigNumber {
-    mp_int _bigNumber;
-}
-
-#pragma mark - Life-Cycle
-
 static BigNumber *ConstantZero = nil;
 static BigNumber *ConstantOne = nil;
 static BigNumber *ConstantTwo = nil;
@@ -47,9 +41,24 @@ static BigNumber *ConstantWeiPerEther = nil;
 static BigNumber *ConstantMaxSafeUnsignedInteger = nil;
 static BigNumber *ConstantMaxSafeSignedInteger = nil;
 
+static RegEx *RegexDecimal = nil;
+static RegEx *RegexHex = nil;
+
+
+@implementation BigNumber {
+    mp_int _bigNumber;
+}
+
+#pragma mark - Life-Cycle
+
 + (void)initialize {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        
+        // Make sure we initialize these before creating the constants below
+        RegexDecimal = [RegEx regExWithPattern:@"^-?[0-9]*$"];
+        RegexHex = [RegEx regExWithPattern:@"^-?0x[0-9A-Fa-f]*$"];
+
         ConstantNegativeOne = [BigNumber bigNumberWithInteger:-1];
         ConstantZero = [BigNumber bigNumberWithInteger:0];
         ConstantOne = [BigNumber bigNumberWithInteger:1];
@@ -78,13 +87,7 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
 }
 
 + (instancetype)bigNumberWithDecimalString:(NSString *)decimalString {
-    static RegEx *regexHex = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        regexHex = [RegEx regExWithPattern:@"^-?[0-9]*$"];
-    });
-
-    if (![regexHex matchesExactly:decimalString]) { return nil; }
+    if (![RegexDecimal matchesExactly:decimalString]) { return nil; }
 
     BigNumber *bigNumber = [[BigNumber alloc] init];
     if (self) {
@@ -94,13 +97,7 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
 }
 
 + (instancetype)bigNumberWithHexString:(NSString *)hexString {
-    static RegEx *regexHex = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        regexHex = [RegEx regExWithPattern:@"^-?0x[0-9A-Fa-f]*$"];
-    });
-    
-    if (![regexHex matchesExactly:hexString]) { return nil; }
+    if (![RegexHex matchesExactly:hexString]) { return nil; }
     
     if ([hexString hasPrefix:@"-"]) {
         hexString = [@"-" stringByAppendingString:[hexString substringFromIndex:3]];
@@ -178,19 +175,11 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
     return result;
 }
 
-//- (void)iadd:(BigNumber *)other {
-//    mp_add(&_bigNumber, [other _bigNumber], &_bigNumber);
-//}
-
 - (BigNumber*)sub:(BigNumber *)other {
     BigNumber *result = [[BigNumber alloc] init];
     mp_sub(&_bigNumber, [other _bigNumber], [result _bigNumber]);
     return result;
 }
-
-//- (void)isub:(BigNumber *)other {
-//    mp_sub(&_bigNumber, [other _bigNumber], &_bigNumber);
-//}
 
 - (BigNumber*)mul:(BigNumber *)other {
     BigNumber *result = [[BigNumber alloc] init];
@@ -209,12 +198,6 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
     mp_div(&_bigNumber, [other _bigNumber], NULL, [result _bigNumber]);
     return result;
 }
-
-//- (BigNumber*)pow:(BigNumber *)other {
-//    BigNumber *result = [[BigNumber alloc] init];
-//    mp_expt_d(&_bigNumber, [other _bigNumber], NULL, [result _bigNumber]);
-//    return result;
-//}
 
 
 #pragma mark - Query API
