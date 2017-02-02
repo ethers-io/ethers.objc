@@ -23,8 +23,9 @@
  *  DEALINGS IN THE SOFTWARE.
  */
 
-#import "NSData+Secure.h"
 #import "Signature.h"
+
+#import "SecureData.h"
 
 @implementation Signature
 
@@ -86,7 +87,7 @@
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<Signature r=%@ s=%@ v=%c>", [_r hexEncodedString], [_s hexEncodedString], _v];
+    return [NSString stringWithFormat:@"<Signature r=%@ s=%@ v=%c>", [SecureData dataToHexString:_r], [SecureData dataToHexString:_s], _v];
 }
 
 @end

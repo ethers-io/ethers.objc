@@ -25,7 +25,8 @@
 #import <XCTest/XCTest.h>
 
 #include "bip39.h"
-#import "NSString+Secure.h"
+
+#import "ethers.h"
 
 @interface test_thirdparty : XCTestCase  {
     int _assertionCount;
@@ -56,7 +57,7 @@
     XCTAssertNil(error, @"Error parsing test cases: %@", error);
 
     for (NSArray *testCase in testCases) {
-        NSData *expectedData = [[@"0x" stringByAppendingString:[testCase objectAtIndex:0]] dataUsingHexEncoding];
+        NSData *expectedData = [SecureData hexStringToData:[@"0x" stringByAppendingString:[testCase objectAtIndex:0]]];
         NSString *expectedMnemonic = [testCase objectAtIndex:1];
         
         const char *mnemonicStr = mnemonic_from_data([expectedData bytes], (int)[expectedData length]);

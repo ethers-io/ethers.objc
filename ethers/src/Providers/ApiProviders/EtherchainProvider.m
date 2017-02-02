@@ -1,7 +1,6 @@
 #import "EtherchainProvider.h"
 
 #import "JsonRpcProvider.h"
-#import "NSString+Secure.h"
 
 
 @implementation EtherchainProvider {

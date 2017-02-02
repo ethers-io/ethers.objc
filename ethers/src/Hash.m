@@ -25,8 +25,8 @@
 
 #import "Hash.h"
 
-#import "NSString+Secure.h"
-#import "NSData+Secure.h"
+#import "SecureData.h"
+
 
 static Hash *ZeroHash = nil;
 
@@ -48,7 +48,7 @@ static Hash *ZeroHash = nil;
     self = [super init];
     if (self) {
         _data = [data copy];
-        _hexString = [_data hexEncodedString];
+        _hexString = [SecureData dataToHexString:_data];
     }
     return self;
 }
@@ -62,7 +62,7 @@ static Hash *ZeroHash = nil;
 }
 
 + (instancetype)hashWithHexString: (NSString*)hexString {
-    return [[Hash alloc] initWithData:[hexString dataUsingHexEncoding]];
+    return [[Hash alloc] initWithData:[SecureData hexStringToData:hexString]];
 }
 
 + (Hash*)zeroHash {

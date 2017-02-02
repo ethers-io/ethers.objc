@@ -25,7 +25,7 @@
 
 #import "JsonRpcProvider.h"
 
-#import "NSData+Secure.h"
+#import "SecureData.h"
 
 @interface Provider (private)
 
@@ -185,7 +185,7 @@
     }
 
     return [self sendMethod:@"eth_sendRawTransaction"
-                     params:@[ [signedTransaction hexEncodedString] ]
+                     params:@[ [SecureData dataToHexString:signedTransaction] ]
                   fetchType:ApiProviderFetchTypeHash];
 }
 

@@ -26,7 +26,7 @@
 #import "EtherscanProvider.h"
 
 #import "Account.h"
-#import "NSData+Secure.h"
+#import "SecureData.h"
 
 
 #pragma mark - Notifications
@@ -51,7 +51,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
         query = [query stringByAppendingFormat:@"&from=%@", transaction.fromAddress];
     }
     if (transaction.data) {
-        query = [query stringByAppendingFormat:@"&data=%@", [transaction.data hexEncodedString]];
+        query = [query stringByAppendingFormat:@"&data=%@", [SecureData dataToHexString:transaction.data]];
     }
     if (transaction.value) {
         query = [query stringByAppendingFormat:@"&value=%@", [transaction.value hexString]];
@@ -225,7 +225,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
         return [HashPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:-100 userInfo:userInfo]];
     }
     
-    NSString *action = [NSString stringWithFormat:@"action=eth_sendRawTransaction&hex=%@", [signedTransaction hexEncodedString]];
+    NSString *action = [NSString stringWithFormat:@"action=eth_sendRawTransaction&hex=%@", [SecureData dataToHexString:signedTransaction]];
     return [self promiseFetchProxyAction:action fetchType:ApiProviderFetchTypeHash];
 }
 

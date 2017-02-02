@@ -25,10 +25,8 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Account.h"
-#import "Transaction.h"
+#import "ethers.h"
 
-#import "NSString+Secure.h"
 
 @interface test_transactions : XCTestCase {
     int _assertionCount;
@@ -62,12 +60,12 @@
     for (NSDictionary *testCase in testCases) {
         NSString *name = [testCase objectForKey:@"name"];
         
-        NSData *expectedUnsignedData = [(NSString*)[testCase objectForKey:@"unsignedTransaction"] dataUsingHexEncoding];
-        NSData *expectedSignedData = [(NSString*)[testCase objectForKey:@"signedTransaction"] dataUsingHexEncoding];
+        NSData *expectedUnsignedData = [SecureData hexStringToData:[testCase objectForKey:@"unsignedTransaction"]];
+        NSData *expectedSignedData = [SecureData hexStringToData:[testCase objectForKey:@"signedTransaction"]];
 
-        NSData *expectedSignedDataChainId5 = [(NSString*)[testCase objectForKey:@"signedTransactionChainId5"] dataUsingHexEncoding];
+        NSData *expectedSignedDataChainId5 = [SecureData hexStringToData:[testCase objectForKey:@"signedTransactionChainId5"]];
 
-        Account *account = [Account accountWithPrivateKey:[(NSString*)[testCase objectForKey:@"privateKey"] dataUsingHexEncoding]];
+        Account *account = [Account accountWithPrivateKey:[SecureData hexStringToData: [testCase objectForKey:@"privateKey"]]];
         XCTAssertEqualObjects([account.address.checksumAddress lowercaseString], [[testCase objectForKey:@"accountAddress"] lowercaseString],
                               @"Failed account info: %@", name);
         _assertionCount++;
@@ -100,7 +98,7 @@
         }
 
         if ([testCase objectForKey:@"data"]) {
-            transaction.data = [(NSString*)[testCase objectForKey:@"data"] dataUsingHexEncoding];
+            transaction.data = [SecureData hexStringToData:[testCase objectForKey:@"data"]];
             transactionChainId5.data = transaction.data;
         }
 

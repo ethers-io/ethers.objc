@@ -26,10 +26,7 @@
 #import <XCTest/XCTest.h>
 
 #import "ethers.h"
-/*
-#import "Account.h"
-#import "NSString+Secure.h"
-*/
+
 @interface test_accounts : XCTestCase {
     int _assertionCount;
 }
@@ -110,7 +107,7 @@
         NSString *privateKey = [testCase objectForKey:@"privateKey"];
         if (!privateKey) { continue; }
         
-        Account *account = [Account accountWithPrivateKey:[privateKey dataUsingHexEncoding]];
+        Account *account = [Account accountWithPrivateKey:[[SecureData secureDataWithHexString:privateKey] data]];
         XCTAssertEqualObjects(account.address.checksumAddress, checksumAddress, @"Failed privateKey to Address: %@", privateKey);
         _assertionCount++;
     }

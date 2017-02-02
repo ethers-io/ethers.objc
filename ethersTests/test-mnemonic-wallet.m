@@ -25,9 +25,8 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Account.h"
+#import "ethers.h"
 
-#import "NSString+Secure.h"
 
 @interface test_mnemonic_wallet : XCTestCase {
     int _assertionCount;
@@ -113,7 +112,7 @@
     XCTAssertNil(error, @"Error parsing test cases: %@", error);
     
     for (NSArray *testCase in testCases) {
-        NSData *expectedData = [[@"0x" stringByAppendingString:[testCase objectAtIndex:0]] dataUsingHexEncoding];
+        NSData *expectedData = [SecureData hexStringToData:[@"0x" stringByAppendingString:[testCase objectAtIndex:0]]];
         NSString *expectedMnemonic = [testCase objectAtIndex:1];
         
         {

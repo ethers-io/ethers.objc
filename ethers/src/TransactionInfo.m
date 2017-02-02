@@ -27,8 +27,8 @@
 
 #import "Account.h"
 #import "ApiProvider.h"
-#import "NSData+Secure.h"
 #import "Payment.h"
+#import "SecureData.h"
 
 @implementation TransactionInfo
 
@@ -173,7 +173,7 @@ static NSData *NullData = nil;
     
     [info setObject:[NSString stringWithFormat:@"%ld", (long)_nonce] forKey:@"nonce"];
     
-    [info setObject:[_data hexEncodedString] forKey:@"data"];
+    [info setObject:[SecureData dataToHexString:_data] forKey:@"data"];
     
     [info setObject:[_value decimalString] forKey:@"value"];
     
@@ -209,7 +209,7 @@ static NSData *NullData = nil;
                                       @"gasLimit": [transaction.gasLimit decimalString],
                                       @"gasPrice": [transaction.gasPrice decimalString],
                                       @"nonce": [@(transaction.nonce) stringValue],
-                                      @"data": [data hexEncodedString],
+                                      @"data": [SecureData dataToHexString:data],
                                       @"value": [transaction.value decimalString],
                                       };
     
@@ -252,7 +252,7 @@ static NSData *NullData = nil;
             [_transactionHash hexString], (unsigned long)_blockNumber, [_blockHash hexString], [NSDate dateWithTimeIntervalSince1970:_timestamp],
             _fromAddress, _toAddress, _contractAddress, (unsigned long)_nonce,
             [_gasLimit decimalString], [_gasPrice decimalString], [_gasUsed decimalString], [_cumulativeGasUsed decimalString],
-            [Payment formatEther:_value], [_data hexEncodedString]
+            [Payment formatEther:_value], [SecureData dataToHexString:_data]
             ];
 }
 

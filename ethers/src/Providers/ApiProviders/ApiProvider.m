@@ -25,8 +25,7 @@
 
 #import "ApiProvider.h"
 
-#import "NSString+Secure.h"
-#import "NSData+Secure.h"
+#import "SecureData.h"
 
 
 NSObject *ensureFloat(NSObject *object) {
@@ -91,7 +90,7 @@ BigNumber *ensureBigNumber(NSObject *object, int base) {
 
 NSData *ensureData(NSObject *object) {
     if ([object isKindOfClass:[NSString class]]) {
-        return [(NSString*)object dataUsingHexEncoding];
+        return [SecureData hexStringToData:(NSString*)object];
         
     } else if ([object isKindOfClass:[NSData class]]) {
         return (NSData*)object;
@@ -306,7 +305,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
     if (transaction.gasLimit) { [info setObject:[transaction.gasLimit hexString] forKey:@"gas"]; }
     if (transaction.gasPrice) { [info setObject:[transaction.gasPrice hexString] forKey:@"gasPrice"]; }
     if (transaction.value) { [info setObject:[transaction.value hexString] forKey:@"value"]; }
-    if (transaction.data) { [info setObject:[transaction.data hexEncodedString] forKey:@"data"]; }
+    if (transaction.data) { [info setObject:[SecureData dataToHexString:transaction.data] forKey:@"data"]; }
     
     return info;
 }

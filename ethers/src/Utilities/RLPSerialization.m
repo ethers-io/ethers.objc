@@ -26,25 +26,20 @@
 
 #import "RLPSerialization.h"
 
-#import "NSData+Secure.h"
-#import "NSMutableData+Secure.h"
+#import "SecureData.h"
+#import "Utilities.h"
 
 
-NSErrorDomain RLPCoderErrorDomain = @"RLPCoderError";
+NSErrorDomain RLPSerializationErrorDomain = @"RLPCoderError";
 
-
-@implementation RLPCoder
-
-/*
-NSData* getLengthData(NSUInteger length) {
-    NSMutableData *data = [NSMutableData secureDataWithCapacity:8];
-    while (length) {
-        [data appendByte:(length & 0xff)];
-        length >>= 8;
-    }
-    return [data reverse];
+static void appendByte(NSMutableData *data, unsigned char value) {
+    [data appendBytes:&value length:1];
 }
-*/
+
+
+@implementation RLPSerialization
+
+
 NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
     unsigned char *bytes = (unsigned char*)data.bytes;
     
@@ -68,14 +63,14 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
     
         } else if (data.length <= 55) {
             NSMutableData *result = [NSMutableData dataWithCapacity:1 + data.length];
-            [result appendByte:(0x80 + data.length)];
+            appendByte(result, 0x80 + data.length);
             [result appendData:data];
             return result;
         
         } else {
-            NSData *length = [NSData dataWithInteger:data.length];
+            NSData *length = convertIntegerToData(data.length);
             NSMutableData *result = [NSMutableData dataWithCapacity:1 + length.length + data.length];
-            [result appendByte:(0xb7 + length.length)];
+            appendByte(result, 0xb7 + length.length);
             [result appendData:length];
             [result appendData:data];
             return result;
@@ -87,14 +82,14 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
         NSMutableData *payload = [NSMutableData data];
         for (NSObject *child in array) {
             NSError *childError = nil;
-            NSData *encoded = [RLPCoder dataWithObject:child error:&childError];
+            NSData *encoded = [RLPSerialization dataWithObject:child error:&childError];
             if (childError) {
                 NSDictionary *userInfo = @{
                                            @"reason": @"invalid child object",
                                            @"object": [object description],
                                            @"child": [child description]
                                            };
-                *error = [NSError errorWithDomain:RLPCoderErrorDomain code:kRLPCoderErrorInvalidObject userInfo:userInfo];
+                *error = [NSError errorWithDomain:RLPSerializationErrorDomain code:kRLPSerializationErrorInvalidObject userInfo:userInfo];
                 return nil;
             }
             [payload appendData:encoded];
@@ -102,14 +97,14 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
         
         if (payload.length <= 55) {
             NSMutableData *result = [NSMutableData dataWithCapacity:1 + payload.length];
-            [result appendByte:(0xc0 + payload.length)];
+            appendByte(result, 0xc0 + payload.length);
             [result appendData:payload];
             return result;
             
         } else {
-            NSData *length = [NSData dataWithInteger:payload.length];
+            NSData *length = convertIntegerToData(payload.length);
             NSMutableData *result = [NSMutableData dataWithCapacity:1 + length.length + payload.length];
-            [result appendByte:(0xf7 + length.length)];
+            appendByte(result, 0xf7 + length.length);
             [result appendData:length];
             [result appendData:payload];
             return result;
@@ -121,7 +116,7 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
                                    @"reason": @"invalid object",
                                    @"object": [object description]
                                    };
-        *error = [NSError errorWithDomain:RLPCoderErrorDomain code:kRLPCoderErrorInvalidObject userInfo:userInfo];
+        *error = [NSError errorWithDomain:RLPSerializationErrorDomain code:kRLPSerializationErrorInvalidObject userInfo:userInfo];
     }
     
     return nil;
@@ -152,7 +147,7 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
         NSUInteger childOffset = offset + 1 + lengthLength;
         while (childOffset < offset + 1 + lengthLength + length) {
             NSInteger childConsumed = 0;
-            NSObject *child = [RLPCoder _decode:data offset:childOffset consumed:&childConsumed];
+            NSObject *child = [RLPSerialization _decode:data offset:childOffset consumed:&childConsumed];
             if (!child || childConsumed == -1) {
                 *consumed = -1;
                 return nil;
@@ -182,7 +177,7 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
         NSUInteger childOffset = offset + 1;
         while (childOffset < offset + 1 + length) {
             NSInteger childConsumed = 0;
-            NSObject *child = [RLPCoder _decode:data offset:childOffset consumed:&childConsumed];
+            NSObject *child = [RLPSerialization _decode:data offset:childOffset consumed:&childConsumed];
             if (!child || childConsumed == -1) {
                 *consumed = -1;
                 return nil;
@@ -235,18 +230,18 @@ NSUInteger getDataLength(NSData *data, NSInteger offset, NSInteger length) {
     }
 
     NSMutableData *result = [NSMutableData dataWithCapacity:1];
-    [result appendByte:bytes[offset]];
+    appendByte(result, bytes[offset]);
     *consumed = 1;
     return result;
 }
 
 + (NSObject*)objectWithData:(NSData *)data error:(NSError *__autoreleasing *)error {
     NSInteger consumed = 0;
-    NSObject *result = [RLPCoder _decode:data offset:0 consumed:&consumed];
+    NSObject *result = [RLPSerialization _decode:data offset:0 consumed:&consumed];
     if (consumed != data.length) { result = nil; }
     if (!result && error) {
         NSDictionary *userInfo = @{ @"reason": @"invalid data" };
-        *error = [NSError errorWithDomain:RLPCoderErrorDomain code:kRLPCoderErrorInvalidData userInfo:userInfo];
+        *error = [NSError errorWithDomain:RLPSerializationErrorDomain code:kRLPSerializationErrorInvalidData userInfo:userInfo];
     }
     return result;
 }

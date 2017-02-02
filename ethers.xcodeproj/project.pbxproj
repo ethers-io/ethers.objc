@@ -89,12 +89,6 @@
 		E2317F361E31999E00DBE3E4 /* tommath_class.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F311E31999E00DBE3E4 /* tommath_class.h */; };
 		E2317F371E31999E00DBE3E4 /* tommath.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F321E31999E00DBE3E4 /* tommath.h */; };
 		E2317F381E31999E00DBE3E4 /* tommath_superclass.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F331E31999E00DBE3E4 /* tommath_superclass.h */; };
-		E2317F401E3199AD00DBE3E4 /* NSString+Secure.m in Sources */ = {isa = PBXBuildFile; fileRef = E2317F391E3199AD00DBE3E4 /* NSString+Secure.m */; };
-		E2317F411E3199AD00DBE3E4 /* NSData+Secure.m in Sources */ = {isa = PBXBuildFile; fileRef = E2317F3A1E3199AD00DBE3E4 /* NSData+Secure.m */; };
-		E2317F421E3199AD00DBE3E4 /* NSMutableData+Secure.m in Sources */ = {isa = PBXBuildFile; fileRef = E2317F3B1E3199AD00DBE3E4 /* NSMutableData+Secure.m */; };
-		E2317F431E3199AD00DBE3E4 /* NSData+Secure.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F3C1E3199AD00DBE3E4 /* NSData+Secure.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E2317F441E3199AD00DBE3E4 /* NSMutableData+Secure.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F3D1E3199AD00DBE3E4 /* NSMutableData+Secure.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E2317F451E3199AD00DBE3E4 /* NSString+Secure.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F3E1E3199AD00DBE3E4 /* NSString+Secure.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E2317F461E3199AD00DBE3E4 /* ccMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F3F1E3199AD00DBE3E4 /* ccMemory.h */; };
 		E2317F4E1E3199BD00DBE3E4 /* crypto_scrypt-nosse.c in Sources */ = {isa = PBXBuildFile; fileRef = E2317F471E3199BD00DBE3E4 /* crypto_scrypt-nosse.c */; };
 		E2317F4F1E3199BD00DBE3E4 /* crypto_scrypt.h in Headers */ = {isa = PBXBuildFile; fileRef = E2317F481E3199BD00DBE3E4 /* crypto_scrypt.h */; };
@@ -115,6 +109,10 @@
 		E2FA03D21E406FB30013E5A7 /* Signature.h in Headers */ = {isa = PBXBuildFile; fileRef = E2FA03D01E406FB30013E5A7 /* Signature.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E2FA03D31E406FB30013E5A7 /* Signature.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA03D11E406FB30013E5A7 /* Signature.m */; };
 		E2FA03D71E4096560013E5A7 /* test-entropy.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA03D61E4096560013E5A7 /* test-entropy.m */; };
+		E2FA04821E42A0300013E5A7 /* Utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = E2FA04801E42A0300013E5A7 /* Utilities.h */; };
+		E2FA04831E42A0300013E5A7 /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA04811E42A0300013E5A7 /* Utilities.m */; };
+		E2FA04861E42A5660013E5A7 /* SecureData.h in Headers */ = {isa = PBXBuildFile; fileRef = E2FA04841E42A5660013E5A7 /* SecureData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E2FA04871E42A5660013E5A7 /* SecureData.m in Sources */ = {isa = PBXBuildFile; fileRef = E2FA04851E42A5660013E5A7 /* SecureData.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -215,12 +213,6 @@
 		E2317F311E31999E00DBE3E4 /* tommath_class.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tommath_class.h; path = "ThirdParty/libtommath-1.0/tommath_class.h"; sourceTree = "<group>"; };
 		E2317F321E31999E00DBE3E4 /* tommath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tommath.h; path = "ThirdParty/libtommath-1.0/tommath.h"; sourceTree = "<group>"; };
 		E2317F331E31999E00DBE3E4 /* tommath_superclass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tommath_superclass.h; path = "ThirdParty/libtommath-1.0/tommath_superclass.h"; sourceTree = "<group>"; };
-		E2317F391E3199AD00DBE3E4 /* NSString+Secure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Secure.m"; path = "ThirdParty/BreadWallet/NSString+Secure.m"; sourceTree = "<group>"; };
-		E2317F3A1E3199AD00DBE3E4 /* NSData+Secure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+Secure.m"; path = "ThirdParty/BreadWallet/NSData+Secure.m"; sourceTree = "<group>"; };
-		E2317F3B1E3199AD00DBE3E4 /* NSMutableData+Secure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSMutableData+Secure.m"; path = "ThirdParty/BreadWallet/NSMutableData+Secure.m"; sourceTree = "<group>"; };
-		E2317F3C1E3199AD00DBE3E4 /* NSData+Secure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+Secure.h"; path = "ThirdParty/BreadWallet/NSData+Secure.h"; sourceTree = "<group>"; };
-		E2317F3D1E3199AD00DBE3E4 /* NSMutableData+Secure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSMutableData+Secure.h"; path = "ThirdParty/BreadWallet/NSMutableData+Secure.h"; sourceTree = "<group>"; };
-		E2317F3E1E3199AD00DBE3E4 /* NSString+Secure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Secure.h"; path = "ThirdParty/BreadWallet/NSString+Secure.h"; sourceTree = "<group>"; };
 		E2317F3F1E3199AD00DBE3E4 /* ccMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ccMemory.h; path = ThirdParty/BreadWallet/ccMemory.h; sourceTree = "<group>"; };
 		E2317F471E3199BD00DBE3E4 /* crypto_scrypt-nosse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "crypto_scrypt-nosse.c"; path = "ThirdParty/scrypt-1.1.6/crypto_scrypt-nosse.c"; sourceTree = "<group>"; };
 		E2317F481E3199BD00DBE3E4 /* crypto_scrypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crypto_scrypt.h; path = "ThirdParty/scrypt-1.1.6/crypto_scrypt.h"; sourceTree = "<group>"; };
@@ -241,6 +233,10 @@
 		E2FA03D01E406FB30013E5A7 /* Signature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Signature.h; path = src/Signature.h; sourceTree = "<group>"; };
 		E2FA03D11E406FB30013E5A7 /* Signature.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Signature.m; path = src/Signature.m; sourceTree = "<group>"; };
 		E2FA03D61E4096560013E5A7 /* test-entropy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "test-entropy.m"; sourceTree = "<group>"; };
+		E2FA04801E42A0300013E5A7 /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utilities.h; path = src/Utilities/Utilities.h; sourceTree = "<group>"; };
+		E2FA04811E42A0300013E5A7 /* Utilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Utilities.m; path = src/Utilities/Utilities.m; sourceTree = "<group>"; };
+		E2FA04841E42A5660013E5A7 /* SecureData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SecureData.h; path = src/Utilities/SecureData.h; sourceTree = "<group>"; };
+		E2FA04851E42A5660013E5A7 /* SecureData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SecureData.m; path = src/Utilities/SecureData.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -319,6 +315,10 @@
 				E2317EAD1E31981D00DBE3E4 /* RegEx.m */,
 				E2317EAE1E31981D00DBE3E4 /* RLPSerialization.h */,
 				E2317EAF1E31981D00DBE3E4 /* RLPSerialization.m */,
+				E2FA04841E42A5660013E5A7 /* SecureData.h */,
+				E2FA04851E42A5660013E5A7 /* SecureData.m */,
+				E2FA04801E42A0300013E5A7 /* Utilities.h */,
+				E2FA04811E42A0300013E5A7 /* Utilities.m */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -395,12 +395,6 @@
 			isa = PBXGroup;
 			children = (
 				E2317F3F1E3199AD00DBE3E4 /* ccMemory.h */,
-				E2317F3C1E3199AD00DBE3E4 /* NSData+Secure.h */,
-				E2317F3A1E3199AD00DBE3E4 /* NSData+Secure.m */,
-				E2317F3D1E3199AD00DBE3E4 /* NSMutableData+Secure.h */,
-				E2317F3B1E3199AD00DBE3E4 /* NSMutableData+Secure.m */,
-				E2317F3E1E3199AD00DBE3E4 /* NSString+Secure.h */,
-				E2317F391E3199AD00DBE3E4 /* NSString+Secure.m */,
 			);
 			name = breadwallet;
 			sourceTree = "<group>";
@@ -509,11 +503,10 @@
 				E2317ECA1E31987F00DBE3E4 /* Provider.h in Headers */,
 				E2317EA51E31970900DBE3E4 /* Account.h in Headers */,
 				E2317E9D1E31970900DBE3E4 /* BlockInfo.h in Headers */,
-				E2317F441E3199AD00DBE3E4 /* NSMutableData+Secure.h in Headers */,
-				E2317F451E3199AD00DBE3E4 /* NSString+Secure.h in Headers */,
 				E2FA03D21E406FB30013E5A7 /* Signature.h in Headers */,
-				E2317F431E3199AD00DBE3E4 /* NSData+Secure.h in Headers */,
+				E2FA04861E42A5660013E5A7 /* SecureData.h in Headers */,
 				E2317E931E31970900DBE3E4 /* Payment.h in Headers */,
+				E2FA04821E42A0300013E5A7 /* Utilities.h in Headers */,
 				E2317EDC1E31988900DBE3E4 /* EtherchainProvider.h in Headers */,
 				E2317F261E31994500DBE3E4 /* macros.h in Headers */,
 				E2317F131E31994500DBE3E4 /* secp256k1.h in Headers */,
@@ -656,19 +649,19 @@
 				E2317F191E31994500DBE3E4 /* aescrypt.c in Sources */,
 				E2317EB51E31981D00DBE3E4 /* RegEx.m in Sources */,
 				E2317EB71E31981D00DBE3E4 /* RLPSerialization.m in Sources */,
+				E2FA04871E42A5660013E5A7 /* SecureData.m in Sources */,
 				E2317F291E31994500DBE3E4 /* ripemd160.c in Sources */,
+				E2FA04831E42A0300013E5A7 /* Utilities.m in Sources */,
 				E2317EA41E31970900DBE3E4 /* Transaction.m in Sources */,
 				E2317F521E3199BD00DBE3E4 /* scrypt_sha256.c in Sources */,
 				E2317ED91E31988900DBE3E4 /* JsonRpcProvider.m in Sources */,
 				E2317EA61E31970900DBE3E4 /* Account.m in Sources */,
 				E2317F121E31994500DBE3E4 /* ecdsa.c in Sources */,
-				E2317F401E3199AD00DBE3E4 /* NSString+Secure.m in Sources */,
 				E2317E941E31970900DBE3E4 /* Payment.m in Sources */,
 				E2317F2D1E31994500DBE3E4 /* sha3.c in Sources */,
 				E2317F1A1E31994500DBE3E4 /* aeskey.c in Sources */,
 				E2317F181E31994500DBE3E4 /* aes_modes.c in Sources */,
 				E2317EB91E31981D00DBE3E4 /* BigNumber.m in Sources */,
-				E2317F411E3199AD00DBE3E4 /* NSData+Secure.m in Sources */,
 				E2317F271E31994500DBE3E4 /* pbkdf2.c in Sources */,
 				E2317EDD1E31988900DBE3E4 /* EtherchainProvider.m in Sources */,
 				E2317EB31E31981D00DBE3E4 /* Promise.m in Sources */,
@@ -676,7 +669,6 @@
 				E2317F341E31999E00DBE3E4 /* mpi.c in Sources */,
 				E2317F2C1E31994500DBE3E4 /* sha2.c in Sources */,
 				E2317EA01E31970900DBE3E4 /* Hash.m in Sources */,
-				E2317F421E3199AD00DBE3E4 /* NSMutableData+Secure.m in Sources */,
 				E2317EC51E31987F00DBE3E4 /* RoundRobinProvider.m in Sources */,
 				E2317F221E31994500DBE3E4 /* curves.c in Sources */,
 				E2317EC71E31987F00DBE3E4 /* FallbackProvider.m in Sources */,
@@ -823,6 +815,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7GS2C8FTGM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -830,7 +823,10 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = ethers/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ethers.ethers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -841,6 +837,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "";
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 7GS2C8FTGM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -848,7 +845,10 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = ethers/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ethers.ethers;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

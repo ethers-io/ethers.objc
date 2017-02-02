@@ -26,11 +26,11 @@
 
 #import "BigNumber.h"
 
-#import "RegEx.h"
 #include "tommath.h"
 
-#import "NSString+Secure.h"
-#import "NSData+Secure.h"
+#import "RegEx.h"
+#import "SecureData.h"
+
 
 @implementation BigNumber {
     mp_int _bigNumber;
@@ -126,7 +126,7 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
 
 
 + (instancetype)bigNumberWithData:(NSData *)data {
-    return [BigNumber bigNumberWithHexString:[data hexEncodedString]];
+    return [BigNumber bigNumberWithHexString:[SecureData dataToHexString:data]];
 }
 
 + (instancetype)bigNumberWithNumber:(NSNumber *)number {
@@ -312,7 +312,7 @@ static BigNumber *ConstantMaxSafeSignedInteger = nil;
 }
 
 - (NSData*)data {
-    return [[self hexString] dataUsingHexEncoding];
+    return [SecureData hexStringToData:[self hexString]];
 }
 
 #pragma mark - NSObject goodness

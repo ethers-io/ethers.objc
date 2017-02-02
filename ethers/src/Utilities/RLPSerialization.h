@@ -36,13 +36,13 @@
  */
 
 
-extern NSErrorDomain RLPCoderErrorDomain;
+extern NSErrorDomain RLPSerializationErrorDomain;
 
-#define kRLPCoderErrorInvalidObject       -1
-#define kRLPCoderErrorInvalidData         -2
+#define kRLPSerializationErrorInvalidObject       -1
+#define kRLPSerializationErrorInvalidData         -2
 
 
-@interface RLPCoder : NSObject
+@interface RLPSerialization : NSObject
 
 + (NSData *)dataWithObject:(NSObject*)object error:(NSError **)error;
 + (NSObject*)objectWithData:(NSData*)data error:(NSError **)error;

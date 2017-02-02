@@ -25,8 +25,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "RLPSerialization.h"
-#import "NSString+Secure.h"
+#import "ethers.h"
 
 NSObject *recursiveExpandData(NSObject *object) {
     if ([object isKindOfClass:[NSArray class]]) {
@@ -37,7 +36,7 @@ NSObject *recursiveExpandData(NSObject *object) {
         return result;
         
     } else if ([object isKindOfClass:[NSString class]]) {
-        return [(NSString*)object dataUsingHexEncoding];
+        return [SecureData hexStringToData:(NSString*)object];
     }
     
     return nil;
@@ -100,11 +99,11 @@ BOOL recursiveEqual(NSObject *a, NSObject *b) {
         NSString *name = [testCase objectForKey:@"name"];
 
         // The correct encoding/decoing
-        NSData *encoded = [(NSString*)[testCase objectForKey:@"encoded"] dataUsingHexEncoding];
+        NSData *encoded = [SecureData hexStringToData:[testCase objectForKey:@"encoded"]];
         NSObject *decoded = recursiveExpandData([testCase objectForKey:@"decoded"]);
         
         // Check decoding works...
-        NSObject *testDecoded = [RLPCoder objectWithData:encoded error:nil];
+        NSObject *testDecoded = [RLPSerialization objectWithData:encoded error:nil];
         BOOL correctDecoding = recursiveEqual(testDecoded, decoded);
         if (!correctDecoding) {
             NSLog(@"Failed Decoding: %@", name);
@@ -115,7 +114,7 @@ BOOL recursiveEqual(NSObject *a, NSObject *b) {
         _assertionCount++;
         
         // Check encoding works...
-        NSData *testEncoded = [RLPCoder dataWithObject:decoded error:nil];
+        NSData *testEncoded = [RLPSerialization dataWithObject:decoded error:nil];
         BOOL correctEncoding = [testEncoded isEqualToData:encoded];
         if (!correctEncoding) {
             NSLog(@"Failed Encoding: %@", name);

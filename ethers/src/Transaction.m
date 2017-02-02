@@ -27,18 +27,22 @@
 
 #import "Account.h"
 #import "RLPSerialization.h"
-#import "NSData+Secure.h"
-#import "NSMutableData+Secure.h"
-#import "NSString+Secure.h"
+#import "SecureData.h"
+#import "Utilities.h"
 
 static NSErrorDomain ErrorDomain = @"io.ethers.TransactionError";
 
-NSData *stripDataZeros(NSData *data) {
+static NSData *stripDataZeros(NSData *data) {
     const char *bytes = data.bytes;
     NSUInteger offset = 0;
     while (offset < data.length && bytes[offset] == 0) { offset++; }
     return [data subdataWithRange:NSMakeRange(offset, data.length - offset)];
 }
+
+static NSData *dataWithByte(unsigned char value) {
+    return [NSMutableData dataWithBytes:&value length:1];
+}
+
 
 static NSData *NullData = nil;
 
@@ -103,7 +107,7 @@ static NSData *NullData = nil;
     
     // Decode the RLP
     NSError *error = nil;
-    NSArray *raw = (NSArray*)[RLPCoder objectWithData:transactionData error:&error];
+    NSArray *raw = (NSArray*)[RLPSerialization objectWithData:transactionData error:&error];
     if (error || ![raw isKindOfClass:[NSArray class]]) { return nil; }
     
     // @TODO: Is this right? Or is an unsigned transaction still 9 elements?
@@ -228,13 +232,13 @@ static NSData *NullData = nil;
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:9];
     
     {
-        NSData *nonceData = stripDataZeros([NSData dataWithInteger:self.nonce]);
+        NSData *nonceData = stripDataZeros(convertIntegerToData(self.nonce));
         if (nonceData.length > 32) { return nil; }
         [result addObject:nonceData];
     }
     
     if (self.gasPrice) {
-        NSData *gasPriceData = stripDataZeros([[self.gasPrice hexString] dataUsingHexEncoding]);
+        NSData *gasPriceData = stripDataZeros([SecureData hexStringToData:[self.gasPrice hexString]]);
         if (gasPriceData.length > 32) { return nil; }
         [result addObject:gasPriceData];
     } else {
@@ -242,7 +246,7 @@ static NSData *NullData = nil;
     }
 
     if (self.gasLimit) {
-        NSData *gasLimitData = stripDataZeros([[self.gasLimit hexString] dataUsingHexEncoding]);
+        NSData *gasLimitData = stripDataZeros([SecureData hexStringToData:[self.gasLimit hexString]]);
         if (gasLimitData.length > 32) { return nil; }
         [result addObject:gasLimitData];
     } else {
@@ -256,7 +260,7 @@ static NSData *NullData = nil;
     }
     
     if (self.value) {
-        NSData *valueData = stripDataZeros([[self.value hexString] dataUsingHexEncoding]);
+        NSData *valueData = stripDataZeros([SecureData hexStringToData:[self.value hexString]]);
         if (valueData.length > 32) { return nil; }
         [result addObject:valueData];
     } else {
@@ -277,13 +281,13 @@ static NSData *NullData = nil;
     if (account) {
         NSMutableArray *raw = [self _packBasic];
         if (_chainId) {
-            [raw addObject:[NSData dataWithInteger:_chainId]];
+            [raw addObject:dataWithByte(_chainId)];
             [raw addObject:NullData];
             [raw addObject:NullData];
         }
 
         NSError *error = nil;
-        NSData *digest = [[RLPCoder dataWithObject:raw error:&error] KECCAK256];
+        NSData *digest = [SecureData KECCAK256:[RLPSerialization dataWithObject:raw error:&error]];
         _fromAddress = account.address;
         _signature = [account signDigest:digest];
     } else {
@@ -297,17 +301,17 @@ static NSData *NullData = nil;
     if (self.signature) {
         uint8_t v = 27 + self.signature.v;
         if (_chainId) { v += _chainId * 2 + 8; }
-        [raw addObject:[NSData dataWithInteger:v]];
+        [raw addObject:dataWithByte(v)];
         [raw addObject:stripDataZeros(self.signature.r)];
         [raw addObject:stripDataZeros(self.signature.s)];
     } else {
-        [raw addObject:[NSData dataWithInteger:(_chainId ? _chainId: 28)]];
+        [raw addObject:dataWithByte(_chainId ? _chainId: 28)];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
     
     NSError *error = nil;
-    NSData *encodedTransaction = [RLPCoder dataWithObject:raw error:&error];
+    NSData *encodedTransaction = [RLPSerialization dataWithObject:raw error:&error];
     if (error) {
         NSLog(@"Error Serializing: %@", error);
     }
@@ -318,7 +322,7 @@ static NSData *NullData = nil;
 - (NSString*)description {
     return [NSString stringWithFormat:@"<Transaction to=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@>",
             self.toAddress, (unsigned long)self.nonce, [self.gasPrice decimalString], [self.gasLimit decimalString],
-            [self.value decimalString], [self.data hexEncodedString]];
+            [self.value decimalString], [SecureData dataToHexString:self.data]];
 }
 
 @end

@@ -26,9 +26,8 @@
 #import "Address.h"
 
 #import "BigNumber.h"
-#import "NSData+Secure.h"
-#import "NSString+Secure.h"
 #import "RegEx.h"
+#import "SecureData.h"
 
 
 int ibanChecksum(NSString *address) {
@@ -106,10 +105,11 @@ static Address *ZeroAddress = nil;
 + (NSString*)_checksumAddressData: (NSData*)addressData {
     if (addressData.length != 20) { return nil; }
     
-    NSString *bareAddress = [[[addressData hexEncodedString] lowercaseString] substringFromIndex:2];
+    NSString *bareAddress = [[[SecureData dataToHexString:addressData] lowercaseString] substringFromIndex:2];
     const unsigned char *addressBytes = (const unsigned char*)[bareAddress cStringUsingEncoding:NSASCIIStringEncoding];
     
-    NSData *hashed = [[[[addressData hexEncodedString] substringFromIndex:2] dataUsingEncoding:NSASCIIStringEncoding] KECCAK256];
+    // With the new SecureData, refactor this
+    NSData *hashed = [SecureData KECCAK256:[[[SecureData dataToHexString:addressData] substringFromIndex:2] dataUsingEncoding:NSASCIIStringEncoding]];
     const unsigned char *hashedBytes = hashed.bytes;
     
     unsigned char bytes[43];
@@ -160,7 +160,7 @@ static Address *ZeroAddress = nil;
         }
         
         // Compute the checksum address
-        NSString *checksumAddress = [Address _checksumAddressData:[address dataUsingHexEncoding]];
+        NSString *checksumAddress = [Address _checksumAddressData:[SecureData hexStringToData:address]];
         
         // If this address is checksummed, fail if the checksum if wrong
         if (containLowerCase(address) && containUpperCase(address)) {
@@ -183,7 +183,7 @@ static Address *ZeroAddress = nil;
         result = [@"0x" stringByAppendingString:result];
         
         // Compute the checksummed address
-        result = [Address _checksumAddressData:[result dataUsingHexEncoding]];
+        result = [Address _checksumAddressData:[SecureData hexStringToData:result]];
     }
     
     if (result && icapFormat) {
@@ -213,7 +213,7 @@ static Address *ZeroAddress = nil;
 
 + (instancetype)addressWithData:(NSData *)addressData {
     if (addressData.length != 20) { return nil; }
-    return [[Address alloc] initWithString:[addressData hexEncodedString]];
+    return [[Address alloc] initWithString:[SecureData dataToHexString:addressData]];
 }
 
 + (Address*)zeroAddress {
@@ -229,7 +229,7 @@ static Address *ZeroAddress = nil;
 }
 
 - (NSData*)data {
-    return [_checksumAddress dataUsingHexEncoding];
+    return [SecureData hexStringToData:_checksumAddress];
 }
 
 

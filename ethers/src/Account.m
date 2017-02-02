@@ -35,10 +35,8 @@
 #include "secp256k1.h"
 
 #import "BigNumber.h"
-#import "NSData+Secure.h"
-#import "NSMutableData+Secure.h"
-#import "NSString+Secure.h"
 #import "RegEx.h"
+#import "SecureData.h"
 
 static NSErrorDomain ErrorDomain = @"io.ethers.AccountError";
 
@@ -69,12 +67,12 @@ NSData *getHexData(NSString *unprefixedHexString) {
     if (![unprefixedHexString hasPrefix:@"0x"]) {
         unprefixedHexString = [@"0x" stringByAppendingString:unprefixedHexString];
     }
-    return [unprefixedHexString dataUsingHexEncoding];
+    return [SecureData hexStringToData:unprefixedHexString];
 }
 
 NSData *ensureDataLength(NSString *hexString, NSUInteger length) {
     if (![hexString isKindOfClass:[NSString class]]) { return nil; }
-    NSData *data = [[@"0x" stringByAppendingString:hexString] dataUsingHexEncoding];
+    NSData *data = [SecureData hexStringToData:[@"0x" stringByAppendingString:hexString]];
     if ([data length] != length) { return nil; }
     return data;
 }
@@ -134,7 +132,7 @@ static NSMutableSet *Wordlist = nil;
 
 
 @implementation Account {
-    NSData *_privateKey;
+    SecureData *_privateKey;
 }
 
 #pragma mark - Life-Cycle
@@ -160,11 +158,11 @@ static NSMutableSet *Wordlist = nil;
 
     self = [super init];
     if (self) {
-        _privateKey = [NSMutableData secureDataWithData:privateKey];;
+        _privateKey = [SecureData secureDataWithData:privateKey];
         
-        NSMutableData *publicKey = [NSMutableData secureDataWithLength:65];
-        ecdsa_get_public_key65(&secp256k1, [_privateKey bytes], [publicKey mutableBytes]);
-        NSData *addressData = [[[publicKey subdataWithRange:NSMakeRange(1, 64)] KECCAK256] subdataWithRange:NSMakeRange(12, 20)];
+        SecureData *publicKey = [SecureData secureDataWithLength:65];
+        ecdsa_get_public_key65(&secp256k1, _privateKey.bytes, publicKey.mutableBytes);
+        NSData *addressData = [[[publicKey subdataWithRange:NSMakeRange(1, 64)] KECCAK256] subdataWithRange:NSMakeRange(12, 20)].data;
         _address = [Address addressWithData:addressData];
     }
     return self;
@@ -174,8 +172,8 @@ static NSMutableSet *Wordlist = nil;
     const char* phraseStr = [mnemonicPhrase cStringUsingEncoding:NSUTF8StringEncoding];
     if (!mnemonic_check(phraseStr)) { return nil; }
     
-    NSMutableData *seed = [NSMutableData secureDataWithLength:(512 / 8)];
-    mnemonic_to_seed(phraseStr, "", [seed mutableBytes], NULL);
+    SecureData *seed = [SecureData secureDataWithLength:(512 / 8)];
+    mnemonic_to_seed(phraseStr, "", seed.mutableBytes, NULL);
     
     HDNode node;
     hdnode_from_seed([seed bytes], (int)[seed length], SECP256K1_NAME, &node);
@@ -186,18 +184,17 @@ static NSMutableSet *Wordlist = nil;
     hdnode_private_ckd(&node, 0);                     // 0   - External
     hdnode_private_ckd(&node, 0);                     // 0   - Slot #0
     
-    NSMutableData *privateKey = [NSMutableData secureDataWithLength:32];
-    memcpy([privateKey mutableBytes], node.private_key, 32);
+    SecureData *privateKey = [SecureData secureDataWithLength:32];
+    memcpy(privateKey.mutableBytes, node.private_key, 32);
 
-    self = [self initWithPrivateKey:privateKey];
+    self = [self initWithPrivateKey:privateKey.data];
     if (self) {
         _mnemonicPhrase = mnemonicPhrase;
         
-        NSMutableData *fullData = [NSMutableData secureDataWithLength:MAXIMUM_BIP39_DATA_LENGTH];
-        int length = data_from_mnemonic([_mnemonicPhrase cStringUsingEncoding:NSUTF8StringEncoding], [fullData mutableBytes]);
+        SecureData *fullData = [SecureData secureDataWithLength:MAXIMUM_BIP39_DATA_LENGTH];
+        int length = data_from_mnemonic([_mnemonicPhrase cStringUsingEncoding:NSUTF8StringEncoding], fullData.mutableBytes);
         
-        _mnemonicData = [NSMutableData secureDataWithCapacity:length];
-        [(NSMutableData*)_mnemonicData appendBytes:[fullData bytes] length:length];
+        _mnemonicData = [fullData subdataToIndex:length].data;
     }
 
     // Wipe the node
@@ -222,17 +219,17 @@ static NSMutableSet *Wordlist = nil;
 #define MNEMONIC_STRENGTH    (128 / 8)
 
 + (instancetype)randomMnemonicAccount {
-    NSMutableData* data = [NSMutableData secureDataWithLength:MNEMONIC_STRENGTH];
+    SecureData* data = [SecureData secureDataWithLength:MNEMONIC_STRENGTH];
     int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
     if (result != noErr) { return nil; }
 
-    Account *account = [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:mnemonic_from_data(data.bytes, data.length)
+    Account *account = [[Account alloc] initWithMnemonicPhrase:[NSString stringWithCString:mnemonic_from_data(data.bytes, (int)data.length)
                                                                                   encoding:NSUTF8StringEncoding]];    
     return account;
 }
 
 - (NSString*)_privateKeyHash {
-    return [[_privateKey KECCAK256] hexEncodedString];
+    return [[_privateKey KECCAK256] hexString];
 }
 
 
@@ -317,7 +314,7 @@ static NSMutableSet *Wordlist = nil;
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^() {
         // Get the key to encrypt with from the password and salt
-        NSMutableData *derivedKey = [NSMutableData secureDataWithLength:64];
+        SecureData *derivedKey = [SecureData secureDataWithLength:64];
         int status = crypto_scrypt(passwordBytes, (int)passwordData.length, salt.bytes, salt.length, n, r, p, derivedKey.mutableBytes, derivedKey.length, &stop);
         
         // Bad scrypt parameters
@@ -334,20 +331,20 @@ static NSMutableSet *Wordlist = nil;
         
         // Check the MAC
         {
-            NSMutableData *macCheck = [NSMutableData secureDataWithCapacity:(16 + 32)];
-            [macCheck appendData:[derivedKey subdataWithRange:NSMakeRange(16, 16)]];
+            SecureData *macCheck = [SecureData secureDataWithCapacity:(16 + 32)];
+            [macCheck append:[derivedKey subdataWithRange:NSMakeRange(16, 16)]];
             [macCheck appendData:cipherText];
             
-            if (![[macCheck KECCAK256] isEqualToData:mac]) {
+            if (![[macCheck KECCAK256] isEqual:mac]) {
                 sendError(kAccountErrorWrongPassword, @"Wrong Password");
                 return;
             }
         }
 
-        NSMutableData *privateKey = [NSMutableData secureDataWithLength:32];
+        SecureData *privateKey = [SecureData secureDataWithLength:32];
 
         {
-            NSData *encryptionKey = [derivedKey subdataWithRange:NSMakeRange(0, 16)];
+            SecureData *encryptionKey = [derivedKey subdataWithRange:NSMakeRange(0, 16)];
             unsigned char counter[16];
             [iv getBytes:counter length:iv.length];
             
@@ -368,7 +365,7 @@ static NSMutableSet *Wordlist = nil;
             }
         }
         
-        Account *account = [[Account alloc] initWithPrivateKey:privateKey];
+        Account *account = [[Account alloc] initWithPrivateKey:privateKey.data];
         
         if (![account.address isEqualToAddress:expectedAddress]) {
             sendError(kAccountErrorJSONInvalidParameter, @"Address mismatch");
@@ -383,7 +380,7 @@ static NSMutableSet *Wordlist = nil;
             NSData *mnemonicCiphertext = ensureDataLength([ethersData objectForKey:@"mnemonicCiphertext"], 16);
             if (mnemonicCounter && mnemonicCiphertext) {
 
-                NSMutableData *mnemonicData = [NSMutableData secureDataWithLength:[mnemonicCiphertext length]];
+                SecureData *mnemonicData = [SecureData secureDataWithLength:[mnemonicCiphertext length]];
                 
                 unsigned char counter[16];
                 [mnemonicCounter getBytes:counter length:mnemonicCounter.length];
@@ -403,7 +400,7 @@ static NSMutableSet *Wordlist = nil;
                     return;
                 }
                 
-                Account *mnemonicAccount = [Account accountWithMnemonicData:mnemonicData];
+                Account *mnemonicAccount = [Account accountWithMnemonicData:mnemonicData.data];
                 if (![mnemonicAccount.address isEqualToAddress:account.address]) {
                     sendError(kAccountErrorMnemonicMismatch, @"Mnemonic Mismatch");
                     return;
@@ -436,18 +433,18 @@ static NSMutableSet *Wordlist = nil;
 
     NSUUID *uuid = [NSUUID UUID];
     
-    NSMutableData *iv = [NSMutableData secureDataWithLength:16];;
+    SecureData *iv = [SecureData secureDataWithLength:16];;
     {
-        int failure = SecRandomCopyBytes(kSecRandomDefault, (int)iv.length, [iv mutableBytes]);
+        int failure = SecRandomCopyBytes(kSecRandomDefault, (int)iv.length, iv.mutableBytes);
         if (failure) {
             sendResult(nil);
             return nil;
         }
     }
 
-    NSMutableData *salt = [NSMutableData secureDataWithLength:32];;
+    SecureData *salt = [SecureData secureDataWithLength:32];;
     {
-        int failure = SecRandomCopyBytes(kSecRandomDefault, (int)salt.length, [salt mutableBytes]);
+        int failure = SecRandomCopyBytes(kSecRandomDefault, (int)salt.length, salt.mutableBytes);
         if (failure) {
             sendResult(nil);
             return nil;
@@ -473,13 +470,13 @@ static NSMutableSet *Wordlist = nil;
                         @"r": @(r),
                         @"n": @(n),
                         @"dklen": @([salt length]),
-                        @"salt": [[salt hexEncodedString] substringFromIndex:2],
+                        @"salt": [[salt hexString] substringFromIndex:2],
                         }
                forKey:@"kdfparams"];
     [crypto setObject:@"scrypt" forKey:@"kdf"];
     
     [crypto setObject:@{
-                        @"iv": [[iv hexEncodedString] substringFromIndex:2],
+                        @"iv": [[iv hexString] substringFromIndex:2],
                         }
                forKey:@"cipherparams"];
     [crypto setObject:@"aes-128-ctr" forKey:@"cipher"];
@@ -498,7 +495,7 @@ static NSMutableSet *Wordlist = nil;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^() {
         
         // Get the key to encrypt with from the password and salt
-        NSMutableData *derivedKey = [NSMutableData secureDataWithLength:64];
+        SecureData *derivedKey = [SecureData secureDataWithLength:64];
         int status = crypto_scrypt(passwordBytes, (int)passwordData.length, salt.bytes, salt.length, n, r, p, derivedKey.mutableBytes, derivedKey.length, &stop);
         
         // Bad scrypt parameters
@@ -507,12 +504,13 @@ static NSMutableSet *Wordlist = nil;
             return;
         }
         
-        NSMutableData *cipherText = [NSMutableData secureDataWithLength:32];
+        SecureData *cipherText = [SecureData secureDataWithLength:32];
         {
             unsigned char counter[16];
-            [iv getBytes:counter length:iv.length];
+            memcpy(counter, iv.bytes, MIN(iv.length, sizeof(counter)));
+//            [iv getBytes:counter length:iv.length];
 
-            NSData *encryptionKey = [derivedKey subdataWithRange:NSMakeRange(0, 16)];
+            SecureData *encryptionKey = [derivedKey subdataWithRange:NSMakeRange(0, 16)];
             
             aes_encrypt_ctx context;
             aes_encrypt_key128(encryptionKey.bytes, &context);
@@ -530,10 +528,10 @@ static NSMutableSet *Wordlist = nil;
             }
         }
         
-        [crypto setObject:[[cipherText hexEncodedString] substringFromIndex:2] forKey:@"ciphertext"];
+        [crypto setObject:[[cipherText hexString] substringFromIndex:2] forKey:@"ciphertext"];
 
         if (_mnemonicData) {
-            NSMutableData *mnemonicCounter = [NSMutableData secureDataWithLength:16];;
+            SecureData *mnemonicCounter = [SecureData secureDataWithLength:16];;
             {
                 int failure = SecRandomCopyBytes(kSecRandomDefault, (int)mnemonicCounter.length, [mnemonicCounter mutableBytes]);
                 if (failure) {
@@ -542,11 +540,12 @@ static NSMutableSet *Wordlist = nil;
                 }
             }
 
-            NSMutableData *mnemonicCiphertext = [NSMutableData secureDataWithLength:[_mnemonicData length]];
+            SecureData *mnemonicCiphertext = [SecureData secureDataWithLength:_mnemonicData.length];
             
             // We are using a different key, so it is safe to use the same IV
             unsigned char counter[16];
-            [mnemonicCounter getBytes:counter length:mnemonicCounter.length];
+            memcpy(counter, mnemonicCounter.bytes, MIN(mnemonicCounter.length, sizeof(counter)));
+//            [mnemonicCounter getBytes:counter length:mnemonicCounter.length];
             
             aes_encrypt_ctx context;
             aes_encrypt_key256([derivedKey subdataWithRange:NSMakeRange(32, 32)].bytes, &context);
@@ -563,17 +562,17 @@ static NSMutableSet *Wordlist = nil;
                 return;
             }
             
-            [ethers setObject:[[mnemonicCounter hexEncodedString] substringFromIndex:2] forKey:@"mnemonicCounter"];
-            [ethers setObject:[[mnemonicCiphertext hexEncodedString] substringFromIndex:2] forKey:@"mnemonicCiphertext"];
+            [ethers setObject:[[mnemonicCounter hexString] substringFromIndex:2] forKey:@"mnemonicCounter"];
+            [ethers setObject:[[mnemonicCiphertext hexString] substringFromIndex:2] forKey:@"mnemonicCiphertext"];
         }
 
         
         // Compute the MAC
         {
-            NSMutableData *macCheck = [NSMutableData secureDataWithCapacity:(16 + 32)];
-            [macCheck appendData:[derivedKey subdataWithRange:NSMakeRange(16, 16)]];
-            [macCheck appendData:cipherText];
-            [crypto setObject:[[[macCheck KECCAK256] hexEncodedString] substringFromIndex:2] forKey:@"mac"];
+            SecureData *macCheck = [SecureData secureDataWithCapacity:(16 + 32)];
+            [macCheck append:[derivedKey subdataWithRange:NSMakeRange(16, 16)]];
+            [macCheck append:cipherText];
+            [crypto setObject:[[[macCheck KECCAK256] hexString] substringFromIndex:2] forKey:@"mac"];
         }
         
         NSError *error = nil;
@@ -596,10 +595,10 @@ static NSMutableSet *Wordlist = nil;
 - (Signature*)signDigest:(NSData *)digestData {
     if (digestData.length != 32) { return nil; }
     
-    NSMutableData *signatureData = [NSMutableData secureDataWithLength:64];;
+    SecureData *signatureData = [SecureData secureDataWithLength:64];;
     uint8_t pby;
-    ecdsa_sign_digest(&secp256k1, [_privateKey bytes], [digestData bytes], [signatureData mutableBytes], &pby, NULL);
-    return [Signature signatureWithData:signatureData v:pby];
+    ecdsa_sign_digest(&secp256k1, [_privateKey bytes], digestData.bytes, signatureData.mutableBytes, &pby, NULL);
+    return [Signature signatureWithData:signatureData.data v:pby];
 }
 
 - (void)sign: (Transaction*)transaction {

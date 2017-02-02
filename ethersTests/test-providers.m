@@ -26,13 +26,6 @@
 #import <XCTest/XCTest.h>
 
 #import "ethers.h"
-/*
-#import <ethers/Provider.h>
-#import "EtherscanProvider.h"
-#import "InfuraProvider.h"
-#import "LightClientProvider.h"
-*/
-#import "NSString+Secure.h"
 
 
 @interface test_providers : XCTestCase {
@@ -152,7 +145,7 @@
     // Block: https://testnet.etherscan.io/block/1
     {
         Hash *parentHash = [Hash hashWithHexString:@"0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"];
-        NSData *extraData = [@"0xd883010503846765746887676f312e372e318664617277696e" dataUsingHexEncoding];
+        NSData *extraData = [SecureData hexStringToData:@"0xd883010503846765746887676f312e372e318664617277696e"];
         BigNumber *gasLimit = [BigNumber bigNumberWithDecimalString:@"16760833"];
         BigNumber *gasUsed = [BigNumber bigNumberWithDecimalString:@"0"];
         
@@ -172,7 +165,7 @@
     // Block: https://testnet.etherscan.io/block/55555
     {
         Hash *parentHash = [Hash hashWithHexString:@"0x748e50927fd75445efe2ff20ff5d492c1ce11f89517ea06e3a0e685e99889b4f"];
-        NSData *extraData = [@"0xd783010502846765746887676f312e372e33856c696e7578" dataUsingHexEncoding];
+        NSData *extraData = [SecureData hexStringToData:@"0xd783010502846765746887676f312e372e33856c696e7578"];
         BigNumber *gasLimit = [BigNumber bigNumberWithDecimalString:@"4712388"];
         BigNumber *gasUsed = [BigNumber bigNumberWithDecimalString:@"344142"];
         
