@@ -318,7 +318,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
     NSTimer *_statsTimer;
     NSTimeInterval _startTime;
     
-    NSUInteger _requestCount;
+    NSUInteger _requestCount, _errorCount;
 }
 
 - (instancetype)initWithTestnet:(BOOL)testnet {
@@ -328,7 +328,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
         
         _statsTimer = [NSTimer scheduledTimerWithTimeInterval:(5 * 60.0f) repeats:YES block:^(NSTimer *timer) {
             float dt = ([NSDate timeIntervalSinceReferenceDate] - _startTime) / 60.0f;
-            NSLog(@"%@: %d calls/min (total: %d)", self, (int)(((float) _requestCount) / dt), (int)_requestCount);
+            NSLog(@"%@: %d calls/min (total: %d; errors: %d)", self, (int)(((float) _requestCount) / dt), (int)_requestCount, (int)_errorCount);
         }];
     }
     return self;
@@ -342,12 +342,14 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
 - (void)fetch: (NSURL*)url body: (NSData*)body callback: (void (^)(NSData*, NSError*))callback {
     void (^handleResponse)(NSData*, NSURLResponse*, NSError*) = ^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
+            _errorCount++;
             NSDictionary *userInfo = @{@"error": error, @"url": url};
             callback(nil, [NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorServerUnknownError userInfo:userInfo]);
             return;
         }
         
         if (![response isKindOfClass:[NSHTTPURLResponse class]]) {
+            _errorCount++;
             NSDictionary *userInfo = @{@"reason": @"response not NSHTTPURLResponse", @"url": url};
             callback(nil, [NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorBadResponse userInfo:userInfo]);
             return;
@@ -355,6 +357,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
         
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
         if (httpResponse.statusCode != 200) {
+            _errorCount++;
             NSDictionary *userInfo = @{@"statusCode": @(httpResponse.statusCode), @"url": url};
             callback(nil, [NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorBadResponse userInfo:userInfo]);
             return;
@@ -395,6 +398,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
             NSObject *processed = process(response);
 
             if (!processed) {
+                _errorCount++;
                 NSMutableDictionary *userInfo = [@{@"reason": @"processed value is nil", @"url": url} mutableCopy];
                 if (body) { [userInfo setObject:[[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding] forKey:@"body"]; }
                 if (response) { [userInfo setObject:[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding] forKey:@"response"]; }
@@ -402,6 +406,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
                 return;
             
             } else if ([processed isKindOfClass:[NSError class]]) {
+                _errorCount++;
                 NSError *error = (NSError*)processed;
                 NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
                 [userInfo setObject:url forKey:@"url"];
@@ -418,6 +423,7 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
                 result = coerceValue(processed, fetchType);
 
                 if (!result) {
+                    _errorCount++;
                     NSMutableDictionary *userInfo = [@{@"reason": @"coerced value is nil", @"url": url} mutableCopy];
                     if (body) { [userInfo setObject:[[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding] forKey:@"body"]; }
                     if (response) { [userInfo setObject:[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding] forKey:@"response"]; }
