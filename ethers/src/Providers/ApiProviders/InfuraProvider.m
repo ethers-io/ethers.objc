@@ -27,8 +27,14 @@
 
 @implementation InfuraProvider
 
+- (instancetype)initWithTestnet:(BOOL)testnet {
+    return [self initWithTestnet:testnet accessToken:nil];
+}
+
 - (instancetype)initWithTestnet:(BOOL)testnet accessToken: (NSString*)accessToken {
-    NSString *url = [NSString stringWithFormat:@"https://%@.infura.io/%@", (testnet ? @"ropsten": @"mainnet"), accessToken];
+    NSString *accessTokenValue = accessToken;
+    if (!accessToken) { accessTokenValue = @""; }
+    NSString *url = [NSString stringWithFormat:@"https://%@.infura.io/%@", (testnet ? @"ropsten": @"mainnet"), accessTokenValue];
     self = [super initWithTestnet:testnet url:[NSURL URLWithString:url]];
     if (self) {
         _accessToken = accessToken;
