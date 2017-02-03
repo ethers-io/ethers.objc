@@ -128,7 +128,8 @@ NSData *ensureDataLength(NSString *hexString, NSUInteger length) {
 #pragma mark - Account
 
 static NSMutableSet *Wordlist = nil;
-
+static NSDateFormatter *DateFormatter = nil;
+static NSDateFormatter *TimeFormatter = nil;
 
 @implementation Account {
     SecureData *_privateKey;
@@ -147,6 +148,12 @@ static NSMutableSet *Wordlist = nil;
             if (!word) { break; }
             [Wordlist addObject:[NSString stringWithUTF8String:word]];
         }
+        
+        DateFormatter = [[NSDateFormatter alloc] init];
+        [DateFormatter setDateFormat:@"yyyy-MM-dd"];
+
+        TimeFormatter = [[NSDateFormatter alloc] init];
+        [TimeFormatter setDateFormat:@"HH-mm-ss"];
         
         NSLog(@"BIP39 World List: %d words", (int)Wordlist.count);
     });
@@ -480,7 +487,12 @@ static NSMutableSet *Wordlist = nil;
     [crypto setObject:@"aes-128-ctr" forKey:@"cipher"];
     
     // Set ethers parameters
-    [ethers setObject:@"UTC--YYYY-mm-ddTHH-MM-SS.0Z--address" forKey:@"gethFilename"];
+    NSDate *now = [NSDate date];
+    NSString *gethFilename = [NSString stringWithFormat:@"UTC--%@T%@.0Z--%@",
+                              [DateFormatter stringFromDate:now],
+                              [TimeFormatter stringFromDate:now],
+                              [[self.address.checksumAddress substringFromIndex:2] lowercaseString]];
+    [ethers setObject:gethFilename forKey:@"gethFilename"];
     [ethers setObject:@"ethers/iOS" forKey:@"client"];
     [ethers setObject:@"0.1" forKey:@"version"];
 
