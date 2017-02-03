@@ -25,6 +25,9 @@
 
 #import "Transaction.h"
 
+#include "ecdsa.h"
+#include "secp256k1.h"
+
 #import "Account.h"
 #import "RLPSerialization.h"
 #import "SecureData.h"
@@ -48,9 +51,21 @@ static NSData *NullData = nil;
 
 
 #pragma mark -
+#pragma mark - Signature
+
+@interface Signature (private)
+
++ (instancetype)signatureWithData: (NSData*)data v: (char)v;
+
+@end
+
+
+#pragma mark -
 #pragma mark - Transaction
 
 @implementation Transaction
+
+#pragma mark - Life-Cycle
 
 + (void)initialize {
     static dispatch_once_t onceToken;
@@ -59,36 +74,12 @@ static NSData *NullData = nil;
     });
 }
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-    }
-    return self;
-}
-
 - (instancetype)initWithFromAddress: (Address*)fromAddress {
     self = [self init];
     if (self) {
         _fromAddress = fromAddress;
     }
     return self;
-}
-
-- (void)_setSignature: (Signature*)signature {
-    _signature = signature;
-}
-
-- (instancetype)copy {
-    Transaction *transaction = [Transaction transactionWithFromAddress:self.fromAddress];
-    transaction.toAddress = self.toAddress;
-    transaction.gasLimit = [self.gasLimit copy];
-    transaction.gasPrice = [self.gasPrice copy];
-    transaction.value = [self.value copy];
-    transaction.nonce = self.nonce;
-    transaction.data = [self.data copy];
-    [transaction _setSignature:_signature];
-    
-    return transaction;
 }
 
 + (instancetype)transaction {
@@ -110,8 +101,7 @@ static NSData *NullData = nil;
     NSArray *raw = (NSArray*)[RLPSerialization objectWithData:transactionData error:&error];
     if (error || ![raw isKindOfClass:[NSArray class]]) { return nil; }
     
-    // @TODO: Is this right? Or is an unsigned transaction still 9 elements?
-    if (raw.count != 6 && raw.count != 9) { return nil; }
+    if (raw.count != 9) { return nil; }
 
     // Check that every item is data (and not a nested array)
     for (NSData *item in raw) {
@@ -134,7 +124,7 @@ static NSData *NullData = nil;
         NSData *gasPrice = [raw objectAtIndex:1];
         if (gasPrice.length > 32) {
             return nil;
-        } else if (gasPrice.length) {
+        } else {
             transaction.gasPrice = [BigNumber bigNumberWithData:gasPrice];
         }
     }
@@ -143,7 +133,7 @@ static NSData *NullData = nil;
         NSData *gasLimit = [raw objectAtIndex:2];
         if (gasLimit.length > 32) {
             return nil;
-        } else if (gasLimit.length) {
+        } else {
             transaction.gasLimit = [BigNumber bigNumberWithData:gasLimit];
         }
     }
@@ -160,72 +150,125 @@ static NSData *NullData = nil;
         NSData *value = [raw objectAtIndex:4];
         if (value.length > 32) {
             return nil;
-        } else if (value.length) {
+        } else {
             transaction.value = [BigNumber bigNumberWithData:value];
         }
     }
     
     transaction.data = [raw objectAtIndex:5];
 
-    // @TODO: Check signature (if it exists) and create a transaction with a from
+    {
+        NSData *vObject = [raw objectAtIndex:6];
+        if (vObject.length > 1) { return nil; }
+        
+        unsigned char v = 0;
+        if (vObject.length == 1) {
+            [vObject getBytes:&v range:NSMakeRange(0, 1)];
+        }
+
+        NSData *r = [raw objectAtIndex:7], *s = [raw objectAtIndex:8];;
+        if (r.length > 32 || s.length > 32) { return nil; }
+        
+        NSMutableData *data = [NSMutableData dataWithLength:64];
+        memset(data.mutableBytes, 0, 64);
+        
+        if (r.length) {
+            [r getBytes:&data.mutableBytes[32 - r.length] range:NSMakeRange(0, r.length)];
+        }
+        
+        if (s.length) {
+            [s getBytes:&data.mutableBytes[64 - s.length] range:NSMakeRange(0, s.length)];
+        }
+        
+        [transaction verifySignatureData:data v:v];
+    }
+
     
     return transaction;
 }
-/*
-- (void)setTo:(NSString *)to {
-    if (to) { to = ; }
-    _to = to;
+
+
+#pragma mark - Getters (prevent nil)
+
+- (BigNumber*)gasLimit {
+    if (!_gasLimit) { return [BigNumber constantZero]; }
+    return _gasLimit;
 }
 
-- (void)setGasPrice:(BigNumber *)gasPrice {
-    if (gasPrice && [gasPrice hexString].length > 34) { gasPrice = nil; }
-    _gasPrice = gasPrice;
+- (BigNumber*)gasPrice {
+    if (!_gasPrice) { return [BigNumber constantZero]; }
+    return _gasPrice;
 }
 
-- (void)setGasLimit:(BigNumber *)gasLimit {
-    if (gasLimit && [gasLimit hexString].length > 34) { gasLimit = nil; }
-    _gasLimit = gasLimit;
+- (BigNumber*)value {
+    if (!_value) { return [BigNumber constantZero]; }
+    return _value;
 }
 
-- (void)setValue:(BigNumber *)value {
-    if (value && [value hexString].length > 34) { value = nil; }
-    _value = value;
+- (NSData*)data {
+    if (!_data) { return NullData; }
+    return _data;
 }
-*/
-/*
-- (BOOL)isValidTransaction {
-    if (stripDataZeros([[self.gasPrice hexString] hexToData]).length > 32) { return NO; }
-    if (stripDataZeros([[self.gasLimit hexString] hexToData]).length > 32) { return NO; }
-    if (stripDataZeros([[self.value hexString] hexToData]).length > 32) { return NO; }
-    if (![Account normalizeAddress:self.toAddress]) { return NO; }
-    return YES;
-}
-*/
-//
-//- (void)setData:(NSData *)data {
-//    if (![data isKindOfClass:[NSData class]]) {
-//        @throw [NSError errorWithDomain:ErrorDomain code:-100 userInfo:@{@"reason": @"invalid data"}];
-//    }
-//    _data = data;
-//}
-//
-//- (void)setData:(NSData *)data {
-//    if (![data isKindOfClass:[NSData class]]) {
-//        @throw [NSError errorWithDomain:ErrorDomain code:-100 userInfo:@{@"reason": @"invalid data"}];
-//    }
-//    _data = data;
-//}
 
-/*
- var transactionFields = [
- {name: 'nonce',    maxLength: 32, },
- {name: 'gasPrice', maxLength: 32, },
- {name: 'gasLimit', maxLength: 32, },
- {name: 'to',          length: 20, },
- {name: 'value',    maxLength: 32, },
- {name: 'data'},
- ];
- */
+
+#pragma mark - Signature
+
+- (void)_setSignature: (Signature*)signature {
+    _signature = signature;
+}
+
+- (void)sign:(Account *)account {
+    if (account) {
+        NSMutableArray *raw = [self _packBasic];
+        if (_chainId) {
+            [raw addObject:dataWithByte(_chainId)];
+            [raw addObject:NullData];
+            [raw addObject:NullData];
+        }
+        
+        NSError *error = nil;
+        NSData *digest = [SecureData KECCAK256:[RLPSerialization dataWithObject:raw error:&error]];
+        _fromAddress = account.address;
+        _signature = [account signDigest:digest];
+        
+    } else {
+        _fromAddress = nil;
+        _signature = nil;
+    }
+}
+
+- (void)verifySignatureData: (NSData*)signatureData v: (unsigned char)v {
+    _signature = [Signature signatureWithData:signatureData v:v];
+
+    // Use an int so we can detect underflow
+    int chainId = (v - 35) / 2;
+    if (chainId < 0) { chainId = 0; }
+
+    _chainId = chainId;
+    
+    NSMutableArray *raw = [self _packBasic];
+    if (_chainId) {
+        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:NullData];
+        [raw addObject:NullData];
+    }
+    
+    NSData *digest = [SecureData KECCAK256:[RLPSerialization dataWithObject:raw error:nil]];
+    
+    SecureData *publicKey = [SecureData secureDataWithLength:65];
+    
+    if (_chainId) {
+        v -= (_chainId * 2 + 8);
+    }
+    
+    int failed = ecdsa_verify_digest_recover(&secp256k1, publicKey.mutableBytes, signatureData.bytes, digest.bytes, v - 27);
+    if (!failed) {
+        _fromAddress = [Address addressWithData:[[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data];
+    }
+}
+
+
+#pragma mark - Serialization
 
 - (NSMutableArray*)_packBasic {
     
@@ -244,7 +287,7 @@ static NSData *NullData = nil;
     } else {
         [result addObject:NullData];
     }
-
+    
     if (self.gasLimit) {
         NSData *gasLimitData = stripDataZeros([SecureData hexStringToData:[self.gasLimit hexString]]);
         if (gasLimitData.length > 32) { return nil; }
@@ -266,58 +309,53 @@ static NSData *NullData = nil;
     } else {
         [result addObject:NullData];
     }
-
+    
     if (self.data) {
         [result addObject:self.data];
     } else {
         [result addObject:NullData];
     }
-
+    
     return result;
-}
-
-
-- (void)sign:(Account *)account {
-    if (account) {
-        NSMutableArray *raw = [self _packBasic];
-        if (_chainId) {
-            [raw addObject:dataWithByte(_chainId)];
-            [raw addObject:NullData];
-            [raw addObject:NullData];
-        }
-
-        NSError *error = nil;
-        NSData *digest = [SecureData KECCAK256:[RLPSerialization dataWithObject:raw error:&error]];
-        _fromAddress = account.address;
-        _signature = [account signDigest:digest];
-    } else {
-        _signature = nil;
-    }
 }
 
 - (NSData*)serialize {
     NSMutableArray *raw = [self _packBasic];
     
-    if (self.signature) {
+    if (_signature) {
         uint8_t v = 27 + self.signature.v;
         if (_chainId) { v += _chainId * 2 + 8; }
         [raw addObject:dataWithByte(v)];
         [raw addObject:stripDataZeros(self.signature.r)];
         [raw addObject:stripDataZeros(self.signature.s)];
+
     } else {
         [raw addObject:dataWithByte(_chainId ? _chainId: 28)];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
     
-    NSError *error = nil;
-    NSData *encodedTransaction = [RLPSerialization dataWithObject:raw error:&error];
-    if (error) {
-        NSLog(@"Error Serializing: %@", error);
-    }
-    return encodedTransaction;
+    return [RLPSerialization dataWithObject:raw error:nil];
 }
 
+
+#pragma mark - NSCopying
+
+- (instancetype)copyWithZone:(NSZone *)zone {
+    Transaction *transaction = [Transaction transactionWithFromAddress:self.fromAddress];
+    transaction.nonce = self.nonce;
+    transaction.gasPrice = [self.gasPrice copy];
+    transaction.gasLimit = [self.gasLimit copy];
+    transaction.toAddress = self.toAddress;
+    transaction.value = [self.value copy];
+    transaction.data = [self.data copy];
+    [transaction _setSignature:_signature];
+    
+    return transaction;
+}
+
+
+#pragma mark - NSObject
 
 - (NSString*)description {
     return [NSString stringWithFormat:@"<Transaction to=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@>",

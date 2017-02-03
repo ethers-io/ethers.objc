@@ -25,18 +25,20 @@ var Output = [];
 function addTransaction(privateKey, name, transaction, signature) {
     var rawTransaction = new ethereumTx(transaction);
 
+    var rawTransactionEip155 = new ethereumTx(transaction);
+    rawTransactionEip155._chainId = 5;
+
     var test = {
         accountAddress: '0x' + ethereumUtil.privateToAddress(privateKey).toString('hex'),
         name: name,
         privateKey: '0x' + privateKey.toString('hex'),
         unsignedTransaction: '0x' + rawTransaction.serialize().toString('hex'),
+        unsignedTransactionChainId5: '0x' + rawTransactionEip155.serialize().toString('hex'),
     }
 
     rawTransaction.sign(privateKey);
     test.signedTransaction = '0x' + rawTransaction.serialize().toString('hex');
 
-    var rawTransactionEip155 = new ethereumTx(transaction);
-    rawTransactionEip155._chainId = 5;
     rawTransactionEip155.sign(privateKey);
     test.signedTransactionChainId5 = '0x' + rawTransactionEip155.serialize().toString('hex');
 

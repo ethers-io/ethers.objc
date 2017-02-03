@@ -55,26 +55,26 @@ typedef NS_OPTIONS(unsigned char, ChainId)  {
 
 @interface Transaction : NSObject
 
-+ (instancetype)transaction;
-+ (instancetype)transactionWithFromAddress: (Address*)fromAddress;
++ (nonnull instancetype)transaction;
++ (nonnull instancetype)transactionWithFromAddress: (nonnull Address*)fromAddress;
 
-//+ (instancetype)transactionWithData: (NSData*)transactionData;
++ (nonnull instancetype)transactionWithData: (nonnull NSData*)transactionData;
 
 @property (nonatomic, assign) NSUInteger nonce;
 
-@property (nonatomic, strong) BigNumber *gasPrice;
-@property (nonatomic, strong) BigNumber *gasLimit;
+@property (nonatomic, strong, nonnull) BigNumber *gasPrice;
+@property (nonatomic, strong, nonnull) BigNumber *gasLimit;
 
-@property (nonatomic, strong) Address *toAddress;
-@property (nonatomic, strong) BigNumber *value;
-@property (nonatomic, strong) NSData *data;
+@property (nonatomic, strong, nullable) Address *toAddress;
+@property (nonatomic, strong, nonnull) BigNumber *value;
+@property (nonatomic, strong, nonnull) NSData *data;
 
-@property (nonatomic, readonly) Signature *signature;
+@property (nonatomic, readonly, nullable) Signature *signature;
 
-@property (nonatomic, readonly) Address *fromAddress;
+@property (nonatomic, readonly, nullable) Address *fromAddress;
 
 @property (nonatomic, assign) ChainId chainId;
 
-- (NSData*)serialize;
+- (nonnull NSData*)serialize;
 
 @end
