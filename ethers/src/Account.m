@@ -378,7 +378,7 @@ static NSDateFormatter *TimeFormatter = nil;
         }
         
         // Check for an mnemonic phrase
-        NSDictionary *ethersData = [data objectForKey:@"ethers"];
+        NSDictionary *ethersData = [data objectForKey:@"x-ethers"];
         if ([ethersData isKindOfClass:[NSDictionary class]] && [[ethersData objectForKey:@"version"] isEqual:@"0.1"]) {
             
             NSData *mnemonicCounter = ensureDataLength([ethersData objectForKey:@"mnemonicCounter"], 16);
@@ -465,7 +465,7 @@ static NSDateFormatter *TimeFormatter = nil;
     [json setObject:@(3) forKey:@"version"];
     
     NSMutableDictionary *ethers = [NSMutableDictionary dictionary];
-    [json setObject:ethers forKey:@"ethers"];
+    [json setObject:ethers forKey:@"x-ethers"];
     
     NSMutableDictionary *crypto = [NSMutableDictionary dictionary];
     [json setObject:crypto forKey:@"Crypto"];
