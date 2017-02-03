@@ -1,0 +1,25 @@
+{
+  "name": "extract-mnemonic",
+  "version": "0.0.1",
+  "description": "Extract a BIP39 mnemonic phrase from the x-ethers portion of an ethers-generated JSON wallet.",
+  "main": "index.js",
+  "dependencies": {
+      "aes-js": "2.1.0",
+      "bip39": "2.2.0",
+      "bitcoinjs-lib": "2.3.0",
+      "js-sha3": "0.5.7",
+      "scrypt-js": "2.0.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ethers",
+    "bip39",
+    "mnemonic",
+    "wallet",
+    "recovery"
+  ],
+  "author": "Richard Moore <me@ricmoo.com>",
+  "license": "MIT"
+}

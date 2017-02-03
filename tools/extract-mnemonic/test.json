@@ -1,0 +1,28 @@
+{
+   "version" : 3,
+   "Crypto" : {
+      "mac" : "060431184685912846eace0cf187c6f49cfdc431142c5e9384d7e9a88ba6d08f",
+      "cipher" : "aes-128-ctr",
+      "kdf" : "scrypt",
+      "ciphertext" : "60b55847a303362200daf0355425e36dca0715c527f5f4ab0a3d2a68e282ba2d",
+      "kdfparams" : {
+         "r" : 8,
+         "salt" : "3717ee93b45cb45fa5c778e1eaba2293415e5bb61419671c0904d678f1bd05a8",
+         "n" : 262144,
+         "dklen" : 32,
+         "p" : 1
+      },
+      "cipherparams" : {
+         "iv" : "f0a0402d58e302d319f898a14c219a1f"
+      }
+   },
+   "id" : "840DF4C3-B05C-48CC-9BB5-BCB1630537C7",
+   "address" : "9b3f904bae737b33340412738b4e1d7ecba88faf",
+   "x-ethers" : {
+      "gethFilename" : "UTC--2017-02-02T21-56-33.0Z--9b3f904bae737b33340412738b4e1d7ecba88faf",
+      "version" : "0.1",
+      "mnemonicCounter" : "540136f4b217784de95ba1b0d979e123",
+      "client" : "ethers/iOS",
+      "mnemonicCiphertext" : "767b5726bf8aeacb79121be4e185bfef"
+   }
+}
