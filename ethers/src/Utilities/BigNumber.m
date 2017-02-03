@@ -123,6 +123,7 @@ static RegEx *RegexHex = nil;
 
 
 + (instancetype)bigNumberWithData:(NSData *)data {
+    if (data.length == 0) { return [BigNumber constantZero]; }
     return [BigNumber bigNumberWithHexString:[SecureData dataToHexString:data]];
 }
 

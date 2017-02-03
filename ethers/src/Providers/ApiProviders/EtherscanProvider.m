@@ -41,19 +41,19 @@ NSString* queryifyTransaction(Transaction *transaction) {
     if (!transaction.toAddress) { return nil; }
     
     NSString *query = [NSString stringWithFormat:@"&to=%@", transaction.toAddress];
-    if (transaction.gasPrice) {
+    if (![transaction.gasPrice isZero]) {
         query = [query stringByAppendingFormat:@"&gasPrice=%@", [transaction.gasPrice hexString]];
     }
-    if (transaction.gasLimit) {
+    if (![transaction.gasLimit isZero]) {
         query = [query stringByAppendingFormat:@"&gas=%@", [transaction.gasLimit hexString]];
     }
     if (transaction.fromAddress) {
         query = [query stringByAppendingFormat:@"&from=%@", transaction.fromAddress];
     }
-    if (transaction.data) {
+    if (transaction.data.length) {
         query = [query stringByAppendingFormat:@"&data=%@", [SecureData dataToHexString:transaction.data]];
     }
-    if (transaction.value) {
+    if (![transaction.value isZero]) {
         query = [query stringByAppendingFormat:@"&value=%@", [transaction.value hexString]];
     }
     
