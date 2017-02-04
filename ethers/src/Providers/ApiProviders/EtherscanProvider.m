@@ -72,8 +72,6 @@ NSString* queryifyTransaction(Transaction *transaction) {
 
 @implementation EtherscanProvider {
     NSTimer *_poller;
-    
-    FloatPromise *_etherPricePromise;
 }
 
 
@@ -295,6 +293,49 @@ NSString* queryifyTransaction(Transaction *transaction) {
         return result;
     };
     
+    /*
+    NSMutableArray<ArrayPromise*> *promises = [NSMutableArray arrayWithCapacity:2];
+    
+    {
+        NSString *path = [NSString stringWithFormat:@"/api?module=account&action=txlist&address=%@&startblock=%@&endblock=99999999&sort=asc",
+                          address, getBlockTag(blockTag)];
+        
+        ArrayPromise *promise = [self promiseFetchJSON:[self urlForPath:path]
+                                                  body:nil
+                                             fetchType:ApiProviderFetchTypeArray
+                                               process:processTransactions];
+        [promises addObject:promise];
+    }
+
+    {
+        NSString *path = [NSString stringWithFormat:@"/api?module=account&action=txlistinternal&address=%@&startblock=%@&endblock=99999999&sort=asc",
+                          address, getBlockTag(blockTag)];
+        
+        ArrayPromise *promise = [self promiseFetchJSON:[self urlForPath:path]
+                                                  body:nil
+                                             fetchType:ApiProviderFetchTypeArray
+                                               process:processTransactions];
+        [promises addObject:promise];
+    }
+
+    return [ArrayPromise promiseWithSetup:^(Promise *promise) {
+        [[Promise all:promises] onCompletion:^(ArrayPromise *allPromise) {
+            NSLog(@"FOO: %@ %@", allPromise.value, allPromise.error);
+            if (allPromise.error) {
+                [promise reject:allPromise.error];
+                return;
+            }
+            
+            NSMutableArray *result = [NSMutableArray array];
+            for (NSArray *transactions in allPromise.value) {
+                [result addObjectsFromArray:transactions];
+            }
+            
+            [promise resolve:result];
+        }];
+    }];
+     */
+    
     NSString *path = [NSString stringWithFormat:@"/api?module=account&action=txlist&address=%@&startblock=%@&endblock=99999999&sort=asc",
                       address, getBlockTag(blockTag)];
     
@@ -306,6 +347,8 @@ NSString* queryifyTransaction(Transaction *transaction) {
 
 - (FloatPromise*)getEtherPrice {
     static NSTimeInterval lastEtherPriceTime = 0;
+    static FloatPromise *etherPricePromise = nil;
+    
     NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
     
     // It's been a while since we updted the ether price, update it
@@ -322,13 +365,13 @@ NSString* queryifyTransaction(Transaction *transaction) {
             return [(NSDictionary*)result objectForKey:@"ethusd"];
         };
         
-        _etherPricePromise = [self promiseFetchJSON:[self urlForPath:@"/api?module=stats&action=ethprice"]
-                                               body:nil
-                                          fetchType:ApiProviderFetchTypeFloat
-                                            process:processEtherPrice];
+        etherPricePromise = [self promiseFetchJSON:[self urlForPath:@"/api?module=stats&action=ethprice"]
+                                              body:nil
+                                         fetchType:ApiProviderFetchTypeFloat
+                                           process:processEtherPrice];
     }
     
-    return _etherPricePromise;
+    return etherPricePromise;
 }
 
 

@@ -155,6 +155,8 @@ static NSString *UserAgent = nil;
 - (void)setEtherPrice: (float)etherPrice {
     if (etherPrice == _etherPrice) { return; }
     
+    NSLog(@"Ether Price: $%.02f/ether", etherPrice);
+
     _etherPrice = etherPrice;
 
     [[NSNotificationCenter defaultCenter] postNotificationName:ProviderEtherPriceChangedNotification
