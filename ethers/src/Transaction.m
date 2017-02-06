@@ -358,8 +358,8 @@ static NSData *NullData = nil;
 #pragma mark - NSObject
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<Transaction to=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@>",
-            self.toAddress, (unsigned long)self.nonce, [self.gasPrice decimalString], [self.gasLimit decimalString],
+    return [NSString stringWithFormat:@"<Transaction to=%@ from=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@>",
+            self.toAddress, self.fromAddress, (unsigned long)self.nonce, [self.gasPrice decimalString], [self.gasLimit decimalString],
             [self.value decimalString], [SecureData dataToHexString:self.data]];
 }
 
