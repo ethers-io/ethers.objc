@@ -93,12 +93,17 @@ function extractMnemonic(json, password) {
                 var mnemonic = bip39.entropyToMnemonic(aes.decrypt(cipherText))
                 var root = HDNode.fromSeedBuffer(bip39.mnemonicToSeed(mnemonic));
                 var node = root.derivePath("m/44'/60'/0'/0/0");
+                var privateKey = node.keyPair.d.toBuffer(32);
                 var publicKey = node.keyPair.Q.getEncoded(false);
                 var computedAddress = keccak256(publicKey.slice(1)).substring(24);
                 if (computedAddress !== address) {
                     reject(new Error('wrong password'));
                     return;
                 }
+                //console.log('Mnemonic Phrase: ' + mnemonic);
+                //console.log('Private Key:     0x' + privateKey.toString('hex'));
+                //console.log('Public Key:      0x' + publicKey.toString('hex'));
+                //console.log('Address:         0x' + address);
                 resolve(mnemonic);
             }
         });
