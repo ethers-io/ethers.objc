@@ -50,4 +50,13 @@ typedef NS_OPTIONS(NSUInteger, EtherFormatOption) {
 
 + (BigNumber*)parseEther: (NSString*)etherString;
 
+/**
+ Figure out the decimal separator that is used in a string. If no separator
+ is found "." is returned.
+ 
+ @param string The string for which we want to get the decimal separator
+ @returns Either "," or "."
+ */
++ (NSString* )decimalSeparatorForString:(NSString *)string;
+
 @end

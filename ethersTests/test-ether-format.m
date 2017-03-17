@@ -53,20 +53,36 @@
                        @{@"test": @"1.00", @"result": @"1000000000000000000"},
                        @{@"test": @"01.0", @"result": @"1000000000000000000"},
 
+                       @{@"test": @"123,012345678901234567", @"result": @"123012345678901234567"},
+                       @{@"test": @"1,0", @"result": @"1000000000000000000"},
+                       @{@"test": @"1,00", @"result": @"1000000000000000000"},
+                       @{@"test": @"01,0", @"result": @"1000000000000000000"},
+
                        @{@"test": @"0", @"result": @"0"},
                        @{@"test": @"-0", @"result": @"0"},
                        @{@"test": @"00", @"result": @"0"},
                        @{@"test": @"0.0", @"result": @"0"},
                        @{@"test": @".00", @"result": @"0"},
                        @{@"test": @"00.00", @"result": @"0"},
+                       
+                       @{@"test": @"0,0", @"result": @"0"},
+                       @{@"test": @",00", @"result": @"0"},
+                       @{@"test": @"00,00", @"result": @"0"},
 
                        @{@"test": @"-1.0", @"result": @"-1000000000000000000"},
+                       @{@"test": @"-1,0", @"result": @"-1000000000000000000"},
                        
                        @{@"test": @"0.1", @"result": @"100000000000000000"},
                        @{@"test": @".1", @"result": @"100000000000000000"},
                        @{@"test": @"0.10", @"result": @"100000000000000000"},
                        @{@"test": @".100", @"result": @"100000000000000000"},
                        @{@"test": @"00.100", @"result": @"100000000000000000"},
+                       
+                       @{@"test": @"0,1", @"result": @"100000000000000000"},
+                       @{@"test": @",1", @"result": @"100000000000000000"},
+                       @{@"test": @"0,10", @"result": @"100000000000000000"},
+                       @{@"test": @",100", @"result": @"100000000000000000"},
+                       @{@"test": @"00,100", @"result": @"100000000000000000"},
                        
                        @{@"test": @"-0.1", @"result": @"-100000000000000000"},
                        ];
@@ -124,14 +140,21 @@
     NSArray *tests = @[
                        @"",
                        @".",
+                       @",",
                        @"-",
                        @"0.0.0",
+                       @"0,0,0",
                        @"a",
                        @"0.1\nfoobar",
+                       @"0,1\nfoobar",
                        @"0.a",
+                       @"0,a",
                        @"a.0",
+                       @"a,0",
                        @"123.a",
+                       @"123,a",
                        @"a.1234",
+                       @"a,1234",
                        @"0x56",
                        @"1.0123456789012345678",  // Too many decimals
                        @"-1.0123456789012345678", // Too many decimals (negative)
@@ -236,6 +259,11 @@
                            @"amount": @"1.234",
                            @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
                            },
+                       @{
+                           @"uri": @"IBAN://XE68S7PCGWBX6SF95M9C1KVXUWCWTPLPLI?amount=1,234",
+                           @"amount": @"1,234",
+                           @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
+                           },
                       ];
     
     for (NSDictionary *testcase in tests) {
@@ -277,6 +305,24 @@
         XCTAssertNil(result, @"Failed to fail on parseURI: %@", testcase);
         _assertionCount++;
     }
+}
+
+- (void)testDecimalSeparatorIsCorrectlyDetectedForDots {
+    NSString *separator = [Payment decimalSeparatorForString:@"2.3"];
+    
+    XCTAssertEqual(separator, @".");
+}
+
+- (void)testDecimalSeparatorIsCorrectlyDetectedForCommas {
+    NSString *separator = [Payment decimalSeparatorForString:@"2,3"];
+    
+    XCTAssertEqual(separator, @",");
+}
+
+- (void)testDecimalSeparatorIsCorrectlyDetectedForAnythingElse {
+    NSString *separator = [Payment decimalSeparatorForString:@"1234:45"];
+    
+    XCTAssertEqual(separator, @".");
 }
 
 @end
