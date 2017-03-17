@@ -122,6 +122,8 @@ static RegEx *RegexNumbersOnly = nil;
     NSString *whole = [weiString substringToIndex:decimalIndex];
     NSString *decimal = [weiString substringFromIndex:decimalIndex];
     
+    NSString *separator = [[NSLocale currentLocale] decimalSeparator];
+    
     if (options & EtherFormatOptionCommify) {
         NSString *commified = @"";
         //NSMutableArray *parts = [NSMutableArray arrayWithCapacity:(whole.length + 2) / 3];
@@ -129,7 +131,7 @@ static RegEx *RegexNumbersOnly = nil;
             //NSLog(@"FOO: %@", whole);
             NSInteger chunkStart = whole.length - 3;
             if (chunkStart < 0) { chunkStart = 0; }
-            commified = [NSString stringWithFormat:@"%@,%@", [whole substringFromIndex:chunkStart], commified];
+            commified = [NSString stringWithFormat:@"%@%@%@", [whole substringFromIndex:chunkStart], separator, commified];
             whole = [whole substringToIndex:chunkStart];
         }
         
@@ -152,8 +154,19 @@ static RegEx *RegexNumbersOnly = nil;
     return [NSString stringWithFormat:@"%@.%@", whole, decimal];
 }
 
++ (NSString* )decimalSeparatorForString:(NSString *)string {
+    if ([string rangeOfString:@"."].location != NSNotFound) {
+        return @".";
+    } else if ([string rangeOfString:@","].location != NSNotFound) {
+        return @",";
+    }
+    return @".";
+}
+
 + (BigNumber*)parseEther: (NSString*)etherString {
-    if ([etherString isEqualToString:@"."]) { return nil; }
+    NSString *separator = [self decimalSeparatorForString:etherString];
+    
+    if ([etherString isEqualToString:separator]) { return nil; }
     
     BOOL negative = NO;
     if ([etherString hasPrefix:@"-"]) {
@@ -163,7 +176,7 @@ static RegEx *RegexNumbersOnly = nil;
     
     if (etherString.length == 0) { return nil; }
     
-    NSArray *parts = [etherString componentsSeparatedByString:@"."];
+    NSArray *parts = [etherString componentsSeparatedByString:separator];
     if ([parts count] > 2) { return nil; }
     
     NSString *whole = [parts objectAtIndex:0];
