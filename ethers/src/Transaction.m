@@ -321,7 +321,7 @@ static NSData *NullData = nil;
 
 - (NSData*)serialize {
     NSMutableArray *raw = [self _packBasic];
-    
+
     if (_signature) {
         uint8_t v = 27 + self.signature.v;
         if (_chainId) { v += _chainId * 2 + 8; }
@@ -336,6 +336,35 @@ static NSData *NullData = nil;
     }
     
     return [RLPSerialization dataWithObject:raw error:nil];
+}
+
+- (NSData*)unsignedSerialize {
+    NSMutableArray *raw = [self _packBasic];
+
+    if (_chainId) {
+        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:NullData];
+        [raw addObject:NullData];
+    }
+    
+    return [RLPSerialization dataWithObject:raw error:nil];
+}
+
+- (void)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s {
+    NSMutableData *publicKey = [NSMutableData dataWithLength:65];
+    
+    NSMutableData *sig = [r mutableCopy];
+    [sig appendData:s];
+    
+    NSData *digest = [SecureData KECCAK256:[self unsignedSerialize]];
+
+    for (uint8_t recid = 0; recid <= 3; recid++) {
+        int failed = ecdsa_verify_digest_recover(&secp256k1, publicKey.mutableBytes, sig.bytes, digest.bytes, recid);
+        if (!failed) {
+            _signature = [Signature signatureWithData:[NSData dataWithData:sig] v:recid];
+            return;
+        }
+    }
 }
 
 
@@ -358,9 +387,9 @@ static NSData *NullData = nil;
 #pragma mark - NSObject
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<Transaction to=%@ from=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@>",
+    return [NSString stringWithFormat:@"<Transaction to=%@ from=%@ nonce=%ld gasPrice=%@ gasLimit=%@ value=%@ data=%@ chainId=%d signature=%@>",
             self.toAddress, self.fromAddress, (unsigned long)self.nonce, [self.gasPrice decimalString], [self.gasLimit decimalString],
-            [self.value decimalString], [SecureData dataToHexString:self.data]];
+            [self.value decimalString], [SecureData dataToHexString:self.data], _chainId, _signature];
 }
 
 @end
