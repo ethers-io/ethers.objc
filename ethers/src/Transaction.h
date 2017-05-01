@@ -77,4 +77,7 @@ typedef NS_OPTIONS(unsigned char, ChainId)  {
 
 - (nonnull NSData*)serialize;
 
+- (nonnull NSData*)unsignedSerialize;
+- (void)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s;
+
 @end
