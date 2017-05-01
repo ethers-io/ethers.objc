@@ -87,7 +87,7 @@
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<Signature r=%@ s=%@ v=%c>", [SecureData dataToHexString:_r], [SecureData dataToHexString:_s], _v];
+    return [NSString stringWithFormat:@"<Signature r=%@ s=%@ v=%d>", [SecureData dataToHexString:_r], [SecureData dataToHexString:_s], _v];
 }
 
 @end
