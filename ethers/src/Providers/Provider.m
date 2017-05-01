@@ -189,6 +189,10 @@ static NSString *UserAgent = nil;
     return [self sendNotImplemented:@"getTransactionCount" promiseClass:[IntegerPromise class]];
 }
 
+- (DataPromise*)getCode: (Address*)address {
+    return [self sendNotImplemented:@"getCode" promiseClass:[DataPromise class]];
+}
+
 - (IntegerPromise*)getBlockNumber {
     return [self sendNotImplemented:@"getBlockNumber" promiseClass:[IntegerPromise class]];
 }

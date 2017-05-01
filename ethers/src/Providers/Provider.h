@@ -114,6 +114,8 @@ NSString *getBlockTag(BlockTag blockTag);
 - (IntegerPromise*)getTransactionCount: (Address*)address;
 - (IntegerPromise*)getTransactionCount: (Address*)address blockTag: (BlockTag)blockTag;
 
+- (DataPromise*)getCode: (Address*)address;
+
 - (IntegerPromise*)getBlockNumber;
 - (BigNumberPromise*)getGasPrice;
 

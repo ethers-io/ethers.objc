@@ -191,6 +191,13 @@
     return [self executeOperation:startCallback promiseClass:[IntegerPromise class]];
 }
 
+- (DataPromise*)getCode: (Address*)address {
+    Promise* (^startCallback)(Provider*) = ^Promise*(Provider *provider) {
+        return [provider getCode:address];
+    };
+    return [self executeOperation:startCallback promiseClass:[DataPromise class]];
+}
+
 - (IntegerPromise*)getBlockNumber {
     Promise* (^startCallback)(Provider*) = ^Promise*(Provider *provider) {
         return [provider getBlockNumber];

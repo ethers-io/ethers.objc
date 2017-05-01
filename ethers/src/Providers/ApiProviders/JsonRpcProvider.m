@@ -151,6 +151,16 @@
                   fetchType:ApiProviderFetchTypeIntegerHexString];
 }
 
+- (DataPromise*)getCode: (Address*)address {
+    if (!address) {
+        return [DataPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorInvalidParameters userInfo:@{}]];
+    }
+    
+    return [self sendMethod:@"eth_getCode"
+                     params:@[ address.checksumAddress ]
+                  fetchType:ApiProviderFetchTypeData];
+}
+
 - (IntegerPromise*)getBlockNumber {
     return [self sendMethod:@"eth_blockNumber" params:@[] fetchType:ApiProviderFetchTypeIntegerHexString];
 }

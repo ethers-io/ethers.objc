@@ -133,7 +133,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
 #pragma mark - Calling
 
 - (NSURL*)urlForPath: (NSString*)path {
-    NSString *host = (self.testnet ? @"testnet.etherscan.io": @"api.etherscan.io");
+    NSString *host = (self.testnet ? @"ropsten.etherscan.io": @"api.etherscan.io");
     NSString *apiKey = (_apiKey ? [NSString stringWithFormat:@"&apikey=%@", _apiKey]: @"");
     return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@%@%@", host, path, apiKey]];
 }
@@ -183,6 +183,15 @@ NSString* queryifyTransaction(Transaction *transaction) {
     
     return [self promiseFetchProxyAction:[NSString stringWithFormat:@"action=eth_getTransactionCount&address=%@&tag=%@", address, tag]
                                fetchType:ApiProviderFetchTypeIntegerHexString];
+}
+
+- (DataPromise*)getCode:(Address *)address {
+    if (!address) {
+        return [DataPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorInvalidParameters userInfo:@{}]];
+    }
+    
+    return [self promiseFetchProxyAction:[NSString stringWithFormat:@"action=eth_getCode&address=%@", address]
+                               fetchType:ApiProviderFetchTypeData];
 }
 
 - (IntegerPromise*)getBlockNumber {
