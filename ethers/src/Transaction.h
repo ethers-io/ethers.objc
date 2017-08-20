@@ -27,6 +27,7 @@
 
 #import "Address.h"
 #import "BigNumber.h"
+#import "Hash.h"
 #import "Signature.h"
 
 
@@ -49,6 +50,7 @@ typedef NS_OPTIONS(unsigned char, ChainId)  {
     ChainIdHomestead    = 0x01,
     ChainIdMorden       = 0x02,
     ChainIdRopsten      = 0x03,
+    ChainIdRinkeby      = 0x05,
 };
 
 //typedef unsigned long long Nonce;
@@ -79,5 +81,7 @@ typedef NS_OPTIONS(unsigned char, ChainId)  {
 
 - (nonnull NSData*)unsignedSerialize;
 - (void)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s;
+
+@property (nonatomic, readonly, nullable) Hash *transactionHash;
 
 @end

@@ -367,6 +367,10 @@ static NSData *NullData = nil;
     }
 }
 
+- (Hash*)transactionHash {
+    if (!_signature) { return nil; }
+    return [Hash hashWithData:[SecureData KECCAK256:[self serialize]]];
+}
 
 #pragma mark - NSCopying
 
