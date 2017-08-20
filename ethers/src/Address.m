@@ -88,7 +88,6 @@ static RegEx *MixedCaseAddressRegex = nil;
         unsigned char nullBytes[20];
         memset(nullBytes, 0, sizeof(nullBytes));
         ZeroAddress = [Address addressWithData:[NSData dataWithBytes:nullBytes length:sizeof(nullBytes)]];
-        
     });
 }
 

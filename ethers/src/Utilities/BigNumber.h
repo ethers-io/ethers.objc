@@ -45,19 +45,14 @@
 
 
 - (BigNumber*)add: (BigNumber*)other;
-//- (void)iadd: (BigNumber*)other;
 
 - (BigNumber*)sub: (BigNumber*)other;
-//- (void)isub: (BigNumber*)other;
 
 - (BigNumber*)mul: (BigNumber*)other;
-//- (void)imul: (BigNumber*)other;
 
 - (BigNumber*)div: (BigNumber*)other;
-//- (void)idiv: (BigNumber*)other;
 
 - (BigNumber*)mod: (BigNumber*)other;
-//- (BigNumber*)pow: (BigNumber*)other;
 
 - (NSUInteger)hash;
 - (NSComparisonResult)compare: (id)other;
