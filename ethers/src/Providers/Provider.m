@@ -155,7 +155,7 @@ static NSString *UserAgent = nil;
 }
 
 - (void)setEtherPrice: (float)etherPrice {
-    if (etherPrice == _etherPrice) { return; }
+    if ((int)(etherPrice * 100.0f) == (int)(_etherPrice * 100.0f)) { return; }
     
     NSLog(@"Ether Price: $%.02f/ether", etherPrice);
 
