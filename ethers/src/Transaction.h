@@ -53,7 +53,10 @@ typedef NS_OPTIONS(unsigned char, ChainId)  {
     ChainIdRinkeby      = 0x05,
 };
 
+extern NSString * _Nullable chainName(ChainId chainId);
+
 //typedef unsigned long long Nonce;
+
 
 @interface Transaction : NSObject
 

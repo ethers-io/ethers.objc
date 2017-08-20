@@ -46,6 +46,17 @@ static NSData *dataWithByte(unsigned char value) {
     return [NSMutableData dataWithBytes:&value length:1];
 }
 
+NSString *chainName(ChainId chainId) {
+    switch (chainId) {
+        case ChainIdHomestead:  return @"homestead";
+        case ChainIdMorden:     return @"morden";
+        case ChainIdRopsten:    return @"ropsten";
+        case ChainIdRinkeby:    return @"rinkeby";
+        default:
+            break;
+    }
+    return nil;
+}
 
 static NSData *NullData = nil;
 
@@ -382,6 +393,7 @@ static NSData *NullData = nil;
     transaction.toAddress = self.toAddress;
     transaction.value = [self.value copy];
     transaction.data = [self.data copy];
+    transaction.chainId = self.chainId;
     [transaction _setSignature:_signature];
     
     return transaction;
