@@ -236,6 +236,21 @@
                            @"amount": @"1.234",
                            @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
                            },
+                       @{
+                           @"uri": @"eth:0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6?amount=1.234",
+                           @"amount": @"1.234",
+                           @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
+                           },
+                       @{
+                           @"uri": @"ether:0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6?amount=1.234",
+                           @"amount": @"1.234",
+                           @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
+                           },
+                       @{
+                           @"uri": @"ethereum:0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6?amount=1.234",
+                           @"amount": @"1.234",
+                           @"address": @"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"
+                           },
                       ];
     
     for (NSDictionary *testcase in tests) {

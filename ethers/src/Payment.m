@@ -46,6 +46,15 @@ static RegEx *RegexNumbersOnly = nil;
 - (instancetype)initWithURI: (NSString*)uri {
     self = [super init];
     
+    // Map some common "non-standard" URIs into the standard one
+    NSArray *Schemes = @[@"ether:", @"ethereum:", @"eth:"];
+    for (NSString *scheme in Schemes) {
+        if ([[uri lowercaseString] hasPrefix:scheme]) {
+            uri = [@"iban:" stringByAppendingString:[uri substringFromIndex:scheme.length]];
+            break;
+        }
+    }
+    
     // Make sure it looks like a URL (instead of a URI)
     if ([[uri lowercaseString] hasPrefix:@"iban:"] && ![[uri lowercaseString] hasPrefix:@"iban://"]) {
         uri = [@"iban://" stringByAppendingString:[uri substringFromIndex:5]];
