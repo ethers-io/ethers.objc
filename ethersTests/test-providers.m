@@ -184,4 +184,68 @@
     }
 }
 
+
+- (void)testEthereumNameService {
+    NSString *name = @"ricmoo.firefly.eth";
+    Address *address = [Address addressWithString:@"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"];
+    for (Provider *provider in _providers) {
+        {
+            NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceNameValid", NSStringFromClass([provider class])];
+            XCTestExpectation *expect = [self expectationWithDescription:title];
+            [[provider lookupName:name] onCompletion:^(AddressPromise *promise) {
+                XCTAssertNil(promise.error, @"Error occurred");
+                XCTAssertEqualObjects(promise.value, address, @"Address mismatch");
+                [expect fulfill];
+            }];
+            [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+                XCTAssertNil(error, @"Timeout: %@", title);
+                _assertionCount++;
+            }];
+        }
+        
+        {
+            NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceAddressValid", NSStringFromClass([provider class])];
+            XCTestExpectation *expect = [self expectationWithDescription:title];
+            [[provider lookupAddress:address] onCompletion:^(StringPromise *promise) {
+                XCTAssertNil(promise.error, @"Error occurred");
+                XCTAssertEqualObjects(promise.value, name, @"Name mismatch");
+                [expect fulfill];
+            }];
+            [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+                XCTAssertNil(error, @"Timeout: %@", title);
+                _assertionCount++;
+            }];
+        }
+        
+        {
+            NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceNameInvalid", NSStringFromClass([provider class])];
+            XCTestExpectation *expect = [self expectationWithDescription:title];
+            [[provider lookupName:@"short.eth"] onCompletion:^(AddressPromise *promise) {
+                XCTAssertTrue(promise.error.code == ProviderErrorNotFound, @"Name not missing");
+                [expect fulfill];
+            }];
+            [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+                XCTAssertNil(error, @"Timeout: %@", title);
+                _assertionCount++;
+            }];
+        }
+        {
+            NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceAddressInvalid", NSStringFromClass([provider class])];
+            XCTestExpectation *expect = [self expectationWithDescription:title];
+            Address *address = [Address addressWithString:@"0x0123456789012345678901234567890123456789"];
+            [[provider lookupAddress:address] onCompletion:^(StringPromise *promise) {
+                XCTAssertTrue(promise.error.code == ProviderErrorNotFound, @"Address not missing");
+                [expect fulfill];
+            }];
+            [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+                XCTAssertNil(error, @"Timeout: %@", title);
+                _assertionCount++;
+            }];
+        }
+        
+        // @TODO: Add testcase for Address => Name, but Name !=> Address
+
+    }
+}
+
 @end

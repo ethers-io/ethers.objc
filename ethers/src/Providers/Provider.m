@@ -26,7 +26,9 @@
 #import <UIKit/UIKit.h>
 
 #import "Provider.h"
+#import "SecureData.h"
 #import "TransactionInfo.h"
+#import "Utilities.h"
 
 
 // Convert a BlockTag to its canonical string value
@@ -231,6 +233,120 @@ static NSString *UserAgent = nil;
 
 - (FloatPromise*)getEtherPrice {
     return [self sendNotImplemented:@"getEtherPrice" promiseClass:[FloatPromise class]];
+}
+
+- (AddressPromise*)lookupNameResolver: (NSString*)name {
+    Hash *nodehash = namehash(name);
+
+    void (^promise)(Promise*) = ^(Promise *promise) {
+        Transaction *getResolverTransaction = [Transaction transaction];
+        {
+            SecureData *data = [SecureData secureDataWithCapacity:36];
+            [data appendData:[SecureData hexStringToData:@"0x0178b8bf"]];   // resolver(bytes32)
+            [data appendData:nodehash.data];
+            
+            getResolverTransaction.toAddress = [Address addressWithString:@"0x112234455c3a32fd11230c42e7bccd4a84e02010"];
+            getResolverTransaction.data = data.data;
+        }
+        [[self call:getResolverTransaction] onCompletion:^(DataPromise *resolverPromise) {
+            if (resolverPromise.error) {
+                [promise reject:resolverPromise.error];
+                
+            } else if (resolverPromise.value.length != 32) {
+                NSDictionary *userInfo = @{ @"name": name };
+                [promise reject:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorNotFound userInfo:userInfo]];
+                
+            } else {
+                [promise resolve:[Address addressWithData:[resolverPromise.value subdataWithRange:NSMakeRange(12, 20)]]];
+            }
+        }];
+    };
+    
+    return [AddressPromise promiseWithSetup:promise];
+}
+
+- (AddressPromise*)lookupName: (NSString*)name {
+    Hash *nodehash = namehash(name);
+
+    void (^promise)(Promise*) = ^(Promise *promise) {
+        [[self lookupNameResolver:name] onCompletion:^(AddressPromise *resolverPromise) {
+            Transaction *getAddressTransaction = [Transaction transaction];
+            {
+                SecureData *data = [SecureData secureDataWithCapacity:36];
+                [data appendData:[SecureData hexStringToData:@"0x3b3b57de"]];  // addr(bytes32)
+                [data appendData:nodehash.data];
+
+                getAddressTransaction.toAddress = resolverPromise.value;
+                getAddressTransaction.data = data.data;
+            }
+            [[self call:getAddressTransaction] onCompletion:^(DataPromise *addrPromise) {
+                if (addrPromise.error) {
+                    [promise reject:addrPromise.error];
+                } else if (addrPromise.value.length != 32) {
+                    NSDictionary *userInfo = @{ @"name": name };
+                    [promise reject:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorNotFound userInfo:userInfo]];
+                } else {
+                    [promise resolve:[Address addressWithData:[addrPromise.value subdataWithRange:NSMakeRange(12, 20)]]];
+                }
+            }];
+        }];
+    };
+    
+    return [AddressPromise promiseWithSetup:promise];
+}
+
+- (StringPromise*)lookupAddress: (Address*)address {
+    void (^promise)(Promise*) = ^(Promise *promise) {
+        
+        void (^rejectNotFound)() = ^() {
+            NSDictionary *userInfo = @{ @"address": address };
+            [promise reject:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorNotFound userInfo:userInfo]];
+        };
+        
+        NSString *reverseName = [NSString stringWithFormat:@"%@.addr.reverse", [address.checksumAddress substringFromIndex:2]];
+        Hash *nodehash = namehash(reverseName);
+        [[self lookupNameResolver:reverseName] onCompletion:^(AddressPromise *resolverPromise) {
+            Transaction *getNameTransaction = [Transaction transaction];
+            {
+                SecureData *data = [SecureData secureDataWithCapacity:36];
+                [data appendData:[SecureData hexStringToData:@"0x691f3431"]];  // name(bytes32)
+                [data appendData:nodehash.data];
+                
+                getNameTransaction.toAddress = resolverPromise.value;
+                getNameTransaction.data = data.data;
+            }
+            [[self call:getNameTransaction] onCompletion:^(DataPromise *namePromise) {
+                if (namePromise.error) {
+                    [promise reject:namePromise.error];
+                
+                } else if (namePromise.value.length < 96) {
+                    rejectNotFound();
+                
+                } else {
+                    BigNumber *lengthObj = [BigNumber bigNumberWithData:[namePromise.value subdataWithRange:NSMakeRange(32, 32)]];
+                    NSUInteger length = lengthObj.integerValue;
+                    if (64 + length > namePromise.value.length) {
+                        rejectNotFound();
+                    } else {
+                        NSData *utf8Data = [namePromise.value subdataWithRange:NSMakeRange(64, length)];
+                        NSString *name = [[NSString alloc] initWithData:utf8Data encoding:NSUTF8StringEncoding];
+                        [[self lookupName:name] onCompletion:^(AddressPromise *addressPromise) {
+                            if (addressPromise.error) {
+                                [promise reject:addressPromise.error];
+                            } else if (![addressPromise.value isEqualToAddress:address]) {
+                                rejectNotFound();
+                            } else {
+                                [promise resolve:name];
+                            }
+                        }];
+                    }
+                }
+            }];
+
+        }];
+        
+    };
+    return [StringPromise promiseWithSetup:promise];
 }
 
 @end

@@ -8,4 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "Hash.h"
+
 extern NSData* convertIntegerToData(NSUInteger value);
+
+extern Hash* namehash(NSString *name);

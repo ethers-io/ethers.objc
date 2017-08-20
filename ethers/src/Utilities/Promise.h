@@ -47,6 +47,7 @@
 
 #import <Foundation/Foundation.h>
 
+#import "Address.h"
 #import "BigNumber.h"
 #import "BlockInfo.h"
 #import "Hash.h"
@@ -232,6 +233,18 @@ extern NSErrorDomain PromiseErrorDomain;
 @property (atomic, readonly) TransactionInfo *value;
 
 - (void)onCompletion: (void (^)(TransactionInfoPromise*))completionCallback;
+
+@end
+
+
+#pragma mark -
+#pragma mark - AddressPromise
+
+@interface AddressPromise: Promise
+
+@property (atomic, readonly) Address *value;
+
+- (void)onCompletion: (void (^)(AddressPromise*))completionCallback;
 
 @end
 

@@ -8,6 +8,9 @@
 
 #import "Utilities.h"
 
+#import "RegEx.h"
+#import "SecureData.h"
+
 NSData *convertIntegerToData(NSUInteger value) {
     unsigned char bytes[sizeof(NSUInteger)];
     int offset = sizeof(bytes);
@@ -18,4 +21,33 @@ NSData *convertIntegerToData(NSUInteger value) {
     }
     
     return [NSData dataWithBytes:&bytes[offset] length:(sizeof(bytes) - offset)];
+}
+
+Hash* namehash(NSString *name) {
+    name = [name lowercaseString];
+    
+    // @TODO: Support full IDNA
+    // For now though, we accept this subset
+    static RegEx *ascii7 = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        ascii7 = [RegEx regExWithPattern:@"[a-z0-9.-]*"];
+    });
+    
+    if (!ascii7 || ![ascii7 matchesExactly:name]) {
+        return nil;
+    }
+    
+    NSMutableData *result = [[Hash zeroHash].data mutableCopy];
+    
+    NSArray *parts = [name componentsSeparatedByString:@"."];
+    for (NSInteger i = parts.count - 1; i >= 0; i--) {
+        NSData *label = [[parts objectAtIndex:i] dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [result appendData:[SecureData KECCAK256:label]];
+        
+        result = [[SecureData KECCAK256:result] mutableCopy];
+    }
+    
+    return [Hash hashWithData:result];
 }

@@ -67,16 +67,19 @@ typedef enum ProviderError {
     ProviderErrorTimeout                        = -15,
     
     ProviderErrorConnectionFailed               = -20,
-    
+
+    ProviderErrorNotFound                       = -40,
+
     ProviderErrorServerUnknownError             = -50,
     
 } ProviderError;
+
 
 #pragma mark - Block Tag Constants
 
 typedef NSInteger BlockTag;
 
-#define BLOCK_TAG_EARLIEST                                     0
+#define BLOCK_TAG_EARLIEST                                      0
 #define BLOCK_TAG_LATEST                                       -1
 #define BLOCK_TAG_PENDING                                      -2
 
@@ -132,6 +135,8 @@ NSString *getBlockTag(BlockTag blockTag);
 
 - (FloatPromise*)getEtherPrice;
 
+- (AddressPromise*)lookupName: (NSString*)name;
+- (StringPromise*)lookupAddress: (Address*)address;
 
 //- (void)registerFilter: (Filter*)filter;
 //- (void)unregisterFilter: (Filter*)filter;

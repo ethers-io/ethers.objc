@@ -441,3 +441,28 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
 }
 
 @end
+
+
+@implementation AddressPromise
+
+- (Address*)value {
+    Address *value = (Address*)(super.result);
+    if ([[NSNull null] isEqual:value]) { value = nil; }
+    return value;
+}
+
+- (void)resolve: (NSObject *)result {
+    if (result && ![result isKindOfClass:[Address class]]) {
+        [super reject:[NSError errorWithDomain:PromiseErrorDomain code:0 userInfo:@{@"reason": @"invalid value", @"value": result}]];
+        return;
+    }
+    [super resolve:result];
+}
+
+- (void)onCompletion: (void (^)(AddressPromise*))completionCallback {
+    return [super onCompletion:^(Promise *promise) {
+        completionCallback((AddressPromise*)self);
+    }];
+}
+
+@end
