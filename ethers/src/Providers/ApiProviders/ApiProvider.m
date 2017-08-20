@@ -26,6 +26,7 @@
 #import "ApiProvider.h"
 
 #import "SecureData.h"
+#import "Utilities.h"
 
 
 NSObject *ensureFloat(NSObject *object) {
@@ -302,9 +303,9 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
     
     if (transaction.toAddress) { [info setObject:transaction.toAddress.checksumAddress forKey:@"to"]; }
     if (transaction.fromAddress) { [info setObject:transaction.fromAddress.checksumAddress forKey:@"from"]; }
-    if (![transaction.gasLimit isZero]) { [info setObject:[transaction.gasLimit hexString] forKey:@"gas"]; }
-    if (![transaction.gasPrice isZero]) { [info setObject:[transaction.gasPrice hexString] forKey:@"gasPrice"]; }
-    if (![transaction.value isZero]) { [info setObject:[transaction.value hexString] forKey:@"value"]; }
+    if (![transaction.gasLimit isZero]) { [info setObject:stripHexZeros([transaction.gasLimit hexString]) forKey:@"gas"]; }
+    if (![transaction.gasPrice isZero]) { [info setObject:stripHexZeros([transaction.gasPrice hexString]) forKey:@"gasPrice"]; }
+    if (![transaction.value isZero]) { [info setObject:stripHexZeros([transaction.value hexString]) forKey:@"value"]; }
     if (transaction.data.length) { [info setObject:[SecureData dataToHexString:transaction.data] forKey:@"data"]; }
     
     return info;

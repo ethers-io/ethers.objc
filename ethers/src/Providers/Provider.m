@@ -40,7 +40,7 @@ NSString *getBlockTag(BlockTag blockTag) {
             return @"pending";
         default:
             if (blockTag >= 0) {
-                return [[BigNumber bigNumberWithInteger:blockTag] hexString];
+                return stripHexZeros([[BigNumber bigNumberWithInteger:blockTag] hexString]);
             }
             break;
     }

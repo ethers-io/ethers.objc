@@ -51,3 +51,11 @@ Hash* namehash(NSString *name) {
     
     return [Hash hashWithData:result];
 }
+
+NSString *stripHexZeros(NSString *hexString) {
+    while ([hexString hasPrefix:@"0x0"] && hexString.length > 3) {
+        hexString = [@"0x" stringByAppendingString:[hexString substringFromIndex:3]];
+    }
+    return hexString;
+}
+

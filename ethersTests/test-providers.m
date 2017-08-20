@@ -104,6 +104,7 @@
                 BlockInfo *blockInfo = promise.value;
                 XCTAssertEqualObjects(blockInfo.blockHash, blockHash, @"BlockHash mismatch");
                 XCTAssertEqual(blockInfo.blockNumber, blockNumber, @"BlockNumber mismatch");
+                _assertionCount += 2;
                 checkBlock(blockInfo);
             }
             [expect fulfill];
@@ -142,7 +143,7 @@
 
 - (void)testGetBlock {
     
-    // Block: https://testnet.etherscan.io/block/1
+    // Block: https://ropsten.etherscan.io/block/1
     {
         Hash *parentHash = [Hash hashWithHexString:@"0x41941023680923e0fe4d74a34bdac8141f2540e3ae90623718e47d66d1ca4a2d"];
         NSData *extraData = [SecureData hexStringToData:@"0xd883010503846765746887676f312e372e318664617277696e"];
