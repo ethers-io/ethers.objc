@@ -148,6 +148,14 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
     }];
 }
 
++ (Promise*)timer: (NSTimeInterval)timeout {
+    return [Promise promiseWithSetup:^(Promise *promise) {
+        [NSTimer scheduledTimerWithTimeInterval:5.0f repeats:NO block:^(NSTimer *timer) {
+            [promise resolve:nil];
+        }];
+    }];
+}
+
 - (NSString*)description {
     NSString *state = @"PENDING";
     NSObject *result = nil;

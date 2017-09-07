@@ -75,6 +75,8 @@ extern NSErrorDomain PromiseErrorDomain;
 + (instancetype)resolved: (NSObject*)result;
 + (instancetype)rejected: (NSError*)error;
 
++ (instancetype)timer: (NSTimeInterval)timeout;
+
 + (ArrayPromise*)all: (NSArray<Promise*>*)promises;
 
 // Like JavaScript's race, whichever returns first
