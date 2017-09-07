@@ -113,4 +113,14 @@
     }
 }
 
+- (void)testReportedBugs {
+    // https://github.com/ethers-io/ethers.objc/pull/8
+    // Reported by: https://github.com/zweigraf
+    {
+        NSString *privateKey = @"0x0123456789012345678901234567890123456789012345678901234567890123";
+        Account *account = [Account accountWithPrivateKey:[SecureData hexStringToData:privateKey]];
+        XCTAssertFalse([account isEqual:[NSNumber numberWithInteger:42]], @"Failed account equals non-Account object");
+    }
+}
+
 @end
