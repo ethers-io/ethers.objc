@@ -155,10 +155,8 @@ static NSString *UserAgent = nil;
 }
 
 - (void)setEtherPrice: (float)etherPrice {
-    if ((int)(etherPrice * 100.0f) == (int)(_etherPrice * 100.0f)) { return; }
+    if (roundf(etherPrice * 100.0f) == roundf(_etherPrice * 100.0f)) { return; }
     
-    NSLog(@"Ether Price: $%.02f/ether", etherPrice);
-
     _etherPrice = etherPrice;
 
     [[NSNotificationCenter defaultCenter] postNotificationName:ProviderEtherPriceChangedNotification
