@@ -153,16 +153,16 @@ extern NSErrorDomain PromiseErrorDomain;
 @end
 
 
-//#pragma mark -
-//#pragma mark - DictionaryPromise
-//
-//@interface DictionaryPromise: Promise
-//
-//@property (atomic, readonly) NSDictionary *value;
-//
-//- (void)onCompletion: (void (^)(DictionaryPromise*))completionCallback;
-//
-//@end
+#pragma mark -
+#pragma mark - DictionaryPromise
+
+@interface DictionaryPromise: Promise
+
+@property (atomic, readonly) NSDictionary *value;
+
+- (void)onCompletion: (void (^)(DictionaryPromise*))completionCallback;
+
+@end
 
 
 #pragma mark -

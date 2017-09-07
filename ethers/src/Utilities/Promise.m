@@ -267,7 +267,7 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
 
 @end
 
-/*
+
 @implementation DictionaryPromise
 
 - (NSDictionary*)value {
@@ -291,7 +291,7 @@ NSErrorDomain PromiseErrorDomain = @"PromiseErrorDomain";
 }
 
 @end
-*/
+
 
 @implementation FloatPromise
 
