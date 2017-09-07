@@ -628,7 +628,7 @@ static NSDateFormatter *TimeFormatter = nil;
 #pragma mark - NSObject
 
 - (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[Account class]]) { return NO; }
+    if (![object isKindOfClass:[Account class]]) { return NO; }
     return [[self _privateKeyHash] isEqualToString:[((Account*)object) _privateKeyHash]];
 }
 
