@@ -93,8 +93,11 @@
 
 @property (nonatomic, readonly) Address *address;
 
+@property (nonatomic, readonly) NSData *privateKey;
+
 @property (nonatomic, readonly) NSString *mnemonicPhrase;
 @property (nonatomic, readonly) NSData *mnemonicData;
+
 
 - (Signature*)signDigest: (NSData*)digestData;
 - (void)sign: (Transaction*)transaction;

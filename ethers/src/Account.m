@@ -135,6 +135,7 @@ static NSDateFormatter *TimeFormatter = nil;
     SecureData *_privateKey;
 }
 
+
 #pragma mark - Life-Cycle
 
 + (void)initialize {
@@ -237,6 +238,9 @@ static NSDateFormatter *TimeFormatter = nil;
     return [[_privateKey KECCAK256] hexString];
 }
 
+- (NSData*)privateKey {
+    return _privateKey.data;
+}
 
 #pragma mark - Crowdsale
 
@@ -586,7 +590,7 @@ static NSDateFormatter *TimeFormatter = nil;
         NSError *error = nil;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:json options:0 error:&error];
         if (error) {
-            NSLog(@"Error: %@", error);
+            NSLog(@"Account: Error decoding JSON - %@", error);
             sendResult(nil);
             return;
         }
