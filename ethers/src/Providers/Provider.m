@@ -221,6 +221,10 @@ static NSString *UserAgent = nil;
     return [self sendNotImplemented:@"getBlockByBlockTag" promiseClass:[BlockInfoPromise class]];
 }
 
+- (HashPromise*)getStorageAt: (Address*)address position: (BigNumber*)position {
+    return [self sendNotImplemented:@"getStorageAt" promiseClass:[HashPromise class]];
+}
+
 - (TransactionInfoPromise*)getTransaction: (Hash*)transactionHash {
     return [self sendNotImplemented:@"getTransaction" promiseClass:[TransactionInfoPromise class]];
 }

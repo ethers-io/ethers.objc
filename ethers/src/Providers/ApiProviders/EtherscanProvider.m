@@ -256,6 +256,12 @@ NSString* queryifyTransaction(Transaction *transaction) {
     return [self promiseFetchProxyAction:action fetchType:ApiProviderFetchTypeTransactionInfo];
 }
 
+- (HashPromise*)getStorageAt:(Address *)address position:(BigNumber *)position {
+    NSString *action = [NSString stringWithFormat:@"action=eth_getStorageAt&address=%@&position=%@",
+                        address.checksumAddress, [position hexString]];
+    return [self promiseFetchProxyAction:action fetchType:ApiProviderFetchTypeHash];
+}
+
 - (ArrayPromise*)getTransactions: (Address*)address startBlockTag: (BlockTag)blockTag {
     
     NSObject* (^processTransactions)(NSDictionary*) = ^NSObject*(NSDictionary *response) {

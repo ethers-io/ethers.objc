@@ -26,6 +26,7 @@
 #import "JsonRpcProvider.h"
 
 #import "SecureData.h"
+#import "Utilities.h"
 
 @interface Provider (private)
 
@@ -252,6 +253,17 @@
                      params:@[transactionHash.hexString]
                   fetchType:ApiProviderFetchTypeTransactionInfo];
 }
+
+- (HashPromise*)getStorageAt:(Address *)address position:(BigNumber *)position {
+    if (!address) {
+        return [HashPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorInvalidParameters userInfo:@{}]];
+    }
+    
+    return [self sendMethod:@"eth_getStorageAt"
+                     params:@[ address.checksumAddress, stripHexZeros([position hexString]), @"latest" ]
+                  fetchType:ApiProviderFetchTypeHash];
+}
+
 
 #pragma mark - NSObject
 

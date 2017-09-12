@@ -129,6 +129,8 @@ NSString *getBlockTag(BlockTag blockTag);
 - (BlockInfoPromise*)getBlockByBlockHash: (Hash*)blockHash;
 - (BlockInfoPromise*)getBlockByBlockTag: (BlockTag)blockTag;
 
+- (HashPromise*)getStorageAt: (Address*)address position: (BigNumber*)position;
+
 - (TransactionInfoPromise*)getTransaction: (Hash*)transactionHash;
 
 - (ArrayPromise*)getTransactions: (Address*)address startBlockTag: (BlockTag)blockTag;
