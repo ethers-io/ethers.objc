@@ -1,0 +1,14 @@
+language: objective-c
+osx_image: xcode8.2
+xcode_project: ethers.xcodeproj
+xcode_scheme: ethers
+xcode_sdk: iphonesimulator
+
+addons:
+  apt:
+    packages:
+    - nodejs
+
+script:
+  xcodebuild -project ethers.xcodeproj -scheme ethers -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6,OS=10.1' -configuration Release test
+
