@@ -119,10 +119,10 @@ static NSString *UserAgent = nil;
 }
 
 
-- (instancetype)initWithTestnet:(BOOL)testnet {
+- (instancetype)initWithChainId:(ChainId)chainId {
     self = [super init];
     if (self) {
-        _testnet = testnet;
+        _chainId = chainId;
         _blockNumber = -1;
     }
     return self;
@@ -237,7 +237,29 @@ static NSString *UserAgent = nil;
     return [self sendNotImplemented:@"getEtherPrice" promiseClass:[FloatPromise class]];
 }
 
+- (Address*)getEnsAddress {
+    switch (self.chainId) {
+        case ChainIdHomestead:
+            return [Address addressWithString:@"0x314159265dd8dbb310642f98f50c066173c1259b"];
+        case ChainIdRopsten:
+            return [Address addressWithString:@"0x112234455c3a32fd11230c42e7bccd4a84e02010"];
+        default:
+            break;
+    }
+    
+    return nil;
+}
+
 - (AddressPromise*)lookupNameResolver: (NSString*)name {
+    Address *ensAddress = [self getEnsAddress];
+    
+    // This network doesn't support ens names
+    if (!ensAddress) {
+        return [AddressPromise promiseWithSetup:^(Promise *promise) {
+            [promise reject:[NSError errorWithDomain:PromiseErrorDomain code:ProviderErrorUnsupportedNetwork userInfo:@{}]];
+        }];
+    }
+    
     Hash *nodehash = namehash(name);
 
     void (^promise)(Promise*) = ^(Promise *promise) {
@@ -246,12 +268,7 @@ static NSString *UserAgent = nil;
             SecureData *data = [SecureData secureDataWithCapacity:36];
             [data appendData:[SecureData hexStringToData:@"0x0178b8bf"]];   // resolver(bytes32)
             [data appendData:nodehash.data];
-            
-            if (self.testnet) {
-                getResolverTransaction.toAddress = [Address addressWithString:@"0x112234455c3a32fd11230c42e7bccd4a84e02010"];
-            } else {
-                getResolverTransaction.toAddress = [Address addressWithString:@"0x314159265dd8dbb310642f98f50c066173c1259b"];
-            }
+            getResolverTransaction.toAddress = ensAddress;
             getResolverTransaction.data = data.data;
         }
         [[self call:getResolverTransaction] onCompletion:^(DataPromise *resolverPromise) {
@@ -276,6 +293,14 @@ static NSString *UserAgent = nil;
 
     void (^promise)(Promise*) = ^(Promise *promise) {
         [[self lookupNameResolver:name] onCompletion:^(AddressPromise *resolverPromise) {
+            
+            // There was a problem with the resolver
+            if (resolverPromise.error) {
+                [promise reject:resolverPromise.error];
+                return;
+            }
+            
+            // Prepare the call transaction "addr(bytes32 nodehash)"
             Transaction *getAddressTransaction = [Transaction transaction];
             {
                 SecureData *data = [SecureData secureDataWithCapacity:36];
@@ -285,6 +310,8 @@ static NSString *UserAgent = nil;
                 getAddressTransaction.toAddress = resolverPromise.value;
                 getAddressTransaction.data = data.data;
             }
+            
+            // Send the call to the network
             [[self call:getAddressTransaction] onCompletion:^(DataPromise *addrPromise) {
                 if (addrPromise.error) {
                     [promise reject:addrPromise.error];
@@ -312,6 +339,14 @@ static NSString *UserAgent = nil;
         NSString *reverseName = [NSString stringWithFormat:@"%@.addr.reverse", [address.checksumAddress substringFromIndex:2]];
         Hash *nodehash = namehash(reverseName);
         [[self lookupNameResolver:reverseName] onCompletion:^(AddressPromise *resolverPromise) {
+
+            // There was a problem with the resolver
+            if (resolverPromise.error) {
+                [promise reject:resolverPromise.error];
+                return;
+            }
+
+            // Prepare the call transaction "name(bytes32 nodehash)"
             Transaction *getNameTransaction = [Transaction transaction];
             {
                 SecureData *data = [SecureData secureDataWithCapacity:36];
@@ -321,32 +356,53 @@ static NSString *UserAgent = nil;
                 getNameTransaction.toAddress = resolverPromise.value;
                 getNameTransaction.data = data.data;
             }
+            
+            // Send the call to the network
             [[self call:getNameTransaction] onCompletion:^(DataPromise *namePromise) {
                 if (namePromise.error) {
                     [promise reject:namePromise.error];
-                
-                } else if (namePromise.value.length < 96) {
-                    rejectNotFound();
-                
-                } else {
-                    BigNumber *lengthObj = [BigNumber bigNumberWithData:[namePromise.value subdataWithRange:NSMakeRange(32, 32)]];
-                    NSUInteger length = lengthObj.integerValue;
-                    if (64 + length > namePromise.value.length) {
-                        rejectNotFound();
-                    } else {
-                        NSData *utf8Data = [namePromise.value subdataWithRange:NSMakeRange(64, length)];
-                        NSString *name = [[NSString alloc] initWithData:utf8Data encoding:NSUTF8StringEncoding];
-                        [[self lookupName:name] onCompletion:^(AddressPromise *addressPromise) {
-                            if (addressPromise.error) {
-                                [promise reject:addressPromise.error];
-                            } else if (![addressPromise.value isEqualToAddress:address]) {
-                                rejectNotFound();
-                            } else {
-                                [promise resolve:name];
-                            }
-                        }];
-                    }
+                    return;
                 }
+                
+                if (namePromise.value.length < 96) {
+                    rejectNotFound();
+                    return;
+                }
+                
+                // Now parse the string result [bytes32: pointer to length (32)] [bytes32: length] [bytes32: string data]*
+
+                // Make sure there isn't going to be a buffer overrun
+                BigNumber *lengthObj = [BigNumber bigNumberWithData:[namePromise.value subdataWithRange:NSMakeRange(32, 32)]];
+                if (![lengthObj isSafeIntegerValue]) {
+                    rejectNotFound();
+                    return;
+                }
+                
+                NSUInteger length = lengthObj.integerValue;
+                if (64 + length > namePromise.value.length) {
+                    rejectNotFound();
+                    return;
+                }
+                
+                // Decode the name and lookup the value of that name
+                NSData *utf8Data = [namePromise.value subdataWithRange:NSMakeRange(64, length)];
+                NSString *name = [[NSString alloc] initWithData:utf8Data encoding:NSUTF8StringEncoding];
+                [[self lookupName:name] onCompletion:^(AddressPromise *addressPromise) {
+                    
+                    // Error occurred
+                    if (addressPromise.error) {
+                        [promise reject:addressPromise.error];
+                        return;
+                    }
+                    
+                    // The reverse lookup did not match the forward lookup
+                    if (![addressPromise.value isEqualToAddress:address]) {
+                        rejectNotFound();
+                        return;
+                    }
+                    
+                    [promise resolve:name];
+                }];
             }];
 
         }];

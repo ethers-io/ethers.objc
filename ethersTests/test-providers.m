@@ -29,7 +29,6 @@
 
 
 @interface test_providers : XCTestCase {
-    NSArray<Provider*> *_providers;
     int _assertionCount;
 }
 
@@ -40,59 +39,21 @@
 
 - (void)setUp {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-    _providers = @[
-                   [[EtherscanProvider alloc] initWithTestnet:YES apiKey:nil],
-                   [[InfuraProvider alloc] initWithTestnet:YES accessToken:@"VOSzw3GAef7pxbSbpYeL"],
-                   ];
 }
 
 - (void)tearDown {
     [super tearDown];
     NSLog(@"test-providers: Finished %d assertions.", _assertionCount);
 }
-/*
-- (void)prepareGetBalance: (Address*)address expectedBalance: (NSString*)expectedBalance testnet: (BOOL)testnet {
-    EtherscanProvider *etherscanProvider = [[EtherscanProvider alloc] initWithTestnet:testnet apiKey:nil];
-    
-    XCTestExpectation *expectGetBalance = [self expectationWithDescription:@"getBalance"];
-    [etherscanProvider getBalance:address callback:^(BigNumber *balance, NSError *error) {
-        XCTAssertNil(error, @"Error calling Etherscan");
-        XCTAssertTrue([[balance decimalString] isEqualToString:expectedBalance], @"Wrong balance");
-        [expectGetBalance fulfill];
-    }];
-    
-    [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
-        XCTAssertNil(error, @"Timeout calling Etherscan");
-    }];
-}
-
-- (void)testDebug {
-    Address *address = [Address addressWithString:@"0x88a5C2d9919e46F883EB62F7b8Dd9d0CC45bc290"];
-    EtherscanProvider *etherscanProvider = [[EtherscanProvider alloc] initWithTestnet:YES apiKey:nil];
-
-    XCTestExpectation *expect = [self expectationWithDescription:@"getTransactions"];
-
-    [etherscanProvider getTransactions:address startBlock:0 callback:^(NSArray<TransactionInfo*> *transactions, NSError *error) {
-        NSLog(@"Result: %@ %@", transactions, error);
-        [expect fulfill];
-    }];
-
-
-    [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
-        XCTAssertNil(error, @"Timeout calling Etherscan");
-    }];
-}
-- (void)testGetBalance {
-    [self prepareGetBalance:[Address addressWithString:@"0xb2682160c482eb985ec9f3e364eec0a904c44c23"]
-            expectedBalance:@"964821158108923821" testnet:NO];
-    [self prepareGetBalance:[Address addressWithString:@"0x03a6F7a5ce5866d9A0CCC1D4C980b8d523f80480"]
-            expectedBalance:@"26674736281316788488" testnet:YES];
-}
- */
 
 - (void)doTestGetBlock: (Hash*)blockHash blockNumber: (NSInteger)blockNumber checkBlock: (void (^)(BlockInfo*))checkBlock {
-    for (Provider *provider in _providers) {
+
+    NSArray<Provider*> *providers = @[
+                                      [[EtherscanProvider alloc] initWithChainId:ChainIdRopsten apiKey:nil],
+                                      [[InfuraProvider alloc] initWithChainId:ChainIdRopsten accessToken:@"VOSzw3GAef7pxbSbpYeL"],
+                                      ];
+
+    for (Provider *provider in providers) {
         NSString *title = [NSString stringWithFormat:@"Test/%@/getBlockByBlockHash", NSStringFromClass([provider class])];
         NSLog(@"Test Case: %@", title);
         
@@ -116,7 +77,7 @@
         }];
     }
 
-    for (Provider *provider in _providers) {
+    for (Provider *provider in providers) {
         NSString *title = [NSString stringWithFormat:@"Test/%@/getBlockByBlockTag", NSStringFromClass([provider class])];
         NSLog(@"Test Case: %@", title);
         
@@ -141,7 +102,9 @@
     }
 }
 
-- (void)testGetBlock {
+- (void)testRopstenGetBlock {
+    
+    // @TODO: Move this into a JSON file and provider test cases for all networks
     
     // Block: https://ropsten.etherscan.io/block/1
     {
@@ -187,15 +150,27 @@
 
 
 - (void)testEthereumNameService {
+    NSArray<Provider*> *providers = @[
+                                      [[EtherscanProvider alloc] initWithChainId:ChainIdRopsten apiKey:nil],
+                                      [[InfuraProvider alloc] initWithChainId:ChainIdRopsten accessToken:@"VOSzw3GAef7pxbSbpYeL"],
+                                      ];
+
+    // @TODO: Add test cases for livenet
+    
     NSString *name = @"ricmoo.firefly.eth";
     Address *address = [Address addressWithString:@"0x06B5955A67D827CDF91823E3bB8F069e6c89c1D6"];
-    for (Provider *provider in _providers) {
+    for (Provider *provider in providers) {
         {
             NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceNameValid", NSStringFromClass([provider class])];
             XCTestExpectation *expect = [self expectationWithDescription:title];
             [[provider lookupName:name] onCompletion:^(AddressPromise *promise) {
                 XCTAssertNil(promise.error, @"Error occurred");
-                XCTAssertEqualObjects(promise.value, address, @"Address mismatch");
+                _assertionCount++;
+
+                XCTAssertEqualObjects(promise.value, address,
+                                      @"Address mismatch");
+                _assertionCount++;
+
                 [expect fulfill];
             }];
             [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
@@ -209,7 +184,12 @@
             XCTestExpectation *expect = [self expectationWithDescription:title];
             [[provider lookupAddress:address] onCompletion:^(StringPromise *promise) {
                 XCTAssertNil(promise.error, @"Error occurred");
-                XCTAssertEqualObjects(promise.value, name, @"Name mismatch");
+                _assertionCount++;
+
+                XCTAssertEqualObjects(promise.value, name,
+                                      @"Name mismatch");
+                _assertionCount++;
+
                 [expect fulfill];
             }];
             [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
@@ -222,7 +202,10 @@
             NSString *title = [NSString stringWithFormat:@"Test/%@/testEthereumNameServiceNameInvalid", NSStringFromClass([provider class])];
             XCTestExpectation *expect = [self expectationWithDescription:title];
             [[provider lookupName:@"short.eth"] onCompletion:^(AddressPromise *promise) {
-                XCTAssertTrue(promise.error.code == ProviderErrorNotFound, @"Name not missing");
+                XCTAssertTrue(promise.error.code == ProviderErrorNotFound,
+                              @"Name not missing");
+                _assertionCount++;
+
                 [expect fulfill];
             }];
             [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
@@ -235,7 +218,10 @@
             XCTestExpectation *expect = [self expectationWithDescription:title];
             Address *address = [Address addressWithString:@"0x0123456789012345678901234567890123456789"];
             [[provider lookupAddress:address] onCompletion:^(StringPromise *promise) {
-                XCTAssertTrue(promise.error.code == ProviderErrorNotFound, @"Address not missing");
+                XCTAssertTrue(promise.error.code == ProviderErrorNotFound,
+                              @"Address not missing");
+                _assertionCount++;
+
                 [expect fulfill];
             }];
             [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
@@ -246,6 +232,76 @@
         
         // @TODO: Add testcase for Address => Name, but Name !=> Address
 
+    }
+}
+
+
+/**
+ *  This tests
+ *    - getBalance
+ *    - getStorageAt
+ */
+- (void)doTestContract: (Provider*)provider {
+    Address *address = [Address addressWithString:@"0xffc3f1d12ac2da06193711404dd9ff4fc0e405d0"];
+    
+    {
+        NSString *title = [NSString stringWithFormat:@"Test/%@/testContractGetStorageAt", NSStringFromClass([provider class])];
+        XCTestExpectation *expect = [self expectationWithDescription:title];
+        [[provider getStorageAt:address position:[BigNumber bigNumberWithInteger:2]] onCompletion:^(HashPromise *promise) {
+            XCTAssertNil(promise.error, @"Test Contact chainId had an error");
+            _assertionCount++;
+            
+            BigNumber *value = [BigNumber bigNumberWithHexString:[promise.value hexString]];
+            XCTAssertTrue(value.isSafeIntegerValue,
+                          @"Test Contract chainId is not safe integer");
+            _assertionCount++;
+            
+            XCTAssertEqual([value integerValue], provider.chainId,
+                           @"Test Contract chainId did not match");
+            _assertionCount++;
+            
+            [expect fulfill];
+        }];
+
+        [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+            XCTAssertNil(error, @"Timeout: %@", title);
+            _assertionCount++;
+        }];
+    }
+
+    {
+        NSString *title = [NSString stringWithFormat:@"Test/%@/testContractBalance", NSStringFromClass([provider class])];
+        XCTestExpectation *expect = [self expectationWithDescription:title];
+        [[provider getBalance:address] onCompletion:^(BigNumberPromise *promise) {
+            XCTAssertNil(promise.error, @"Test Contact balance had an error");
+            _assertionCount++;
+
+            XCTAssertEqualObjects(promise.value, [BigNumber bigNumberWithHexString:@"0x11db9e76a2483"],
+                                  @"Test Contract balance did not match");
+            _assertionCount++;
+            
+            [expect fulfill];
+        }];
+        
+        [self waitForExpectationsWithTimeout:10.0f handler:^(NSError *error) {
+            XCTAssertNil(error, @"Timeout: %@", title);
+            _assertionCount++;
+        }];
+    }
+}
+
+- (void)testContract {
+    NSArray *providers = @[
+                           [[InfuraProvider alloc] initWithChainId:ChainIdRopsten],
+                           [[InfuraProvider alloc] initWithChainId:ChainIdRinkeby],
+                           [[InfuraProvider alloc] initWithChainId:ChainIdKovan],
+                           [[EtherscanProvider alloc] initWithChainId:ChainIdRopsten],
+                           [[EtherscanProvider alloc] initWithChainId:ChainIdRinkeby],
+                           [[EtherscanProvider alloc] initWithChainId:ChainIdKovan]
+                           ];
+
+    for (Provider *provider in providers) {
+        [self doTestContract:provider];
     }
 }
 

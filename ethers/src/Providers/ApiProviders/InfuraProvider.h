@@ -38,7 +38,7 @@
 
 @interface InfuraProvider : JsonRpcProvider
 
-- (instancetype)initWithTestnet:(BOOL)testnet accessToken: (NSString*)accessToken;
+- (instancetype)initWithChainId: (ChainId)chainId accessToken: (NSString*)accessToken;
 
 @property (nonatomic, readonly) NSString *accessToken;
 

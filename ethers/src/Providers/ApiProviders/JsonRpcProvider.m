@@ -43,9 +43,8 @@
     NSTimer *_poller;
 }
 
-
-- (instancetype)initWithTestnet:(BOOL)testnet url:(NSURL *)url {
-    self = [super initWithTestnet:testnet];
+- (instancetype)initWithChainId:(ChainId)chainId url:(NSURL *)url {
+    self = [super initWithChainId:chainId];
     if (self) {
         _url = url;
         [self doPoll];
@@ -268,7 +267,7 @@
 #pragma mark - NSObject
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<JsonRpcProvider tetnet=%@ url=%@>", (self.testnet ? @"YES": @"NO"), _url];
+    return [NSString stringWithFormat:@"<JsonRpcProvider chainId=%@ url=%@>", self.chainId, _url];
 }
 
 @end

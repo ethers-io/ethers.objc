@@ -322,8 +322,8 @@ NSMutableDictionary *transactionObject(Transaction *transaction) {
     NSUInteger _requestCount, _errorCount;
 }
 
-- (instancetype)initWithTestnet:(BOOL)testnet {
-    self = [super initWithTestnet:testnet];
+- (instancetype)initWithChainId:(ChainId)chainId {
+    self = [super initWithChainId:chainId];
     if (self) {
         _startTime = [NSDate timeIntervalSinceReferenceDate];
         

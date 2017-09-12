@@ -93,9 +93,9 @@ NSString *getBlockTag(BlockTag blockTag);
 + (NSString*)userAgent;
 
 
-- (instancetype)initWithTestnet: (BOOL)testnet;
+- (instancetype)initWithChainId: (ChainId)chainId;
 
-@property (nonatomic, readonly) BOOL testnet;
+@property (nonatomic, readonly) ChainId chainId;
 
 
 #pragma mark - Polling

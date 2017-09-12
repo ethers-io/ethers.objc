@@ -37,7 +37,7 @@
 
 @interface JsonRpcProvider : ApiProvider
 
-- (instancetype)initWithTestnet:(BOOL)testnet url: (NSURL*)url;
+- (instancetype)initWithChainId: (ChainId)chainId url: (NSURL*)url;
 
 @property (nonatomic, readonly) NSURL *url;
 

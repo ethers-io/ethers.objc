@@ -40,7 +40,7 @@
 
 @interface EtherscanProvider: ApiProvider
 
-- (instancetype)initWithTestnet:(BOOL)testnet apiKey: (NSString*)apiKey;
+- (instancetype)initWithChainId: (ChainId)chainId apiKey: (NSString*)apiKey;
 
 @property (nonatomic, readonly) NSString *apiKey;
 

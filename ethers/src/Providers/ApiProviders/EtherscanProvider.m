@@ -72,17 +72,38 @@ NSString* queryifyTransaction(Transaction *transaction) {
 
 @implementation EtherscanProvider {
     NSTimer *_poller;
+    NSString *_host;
 }
 
 
 #pragma mark - Life-Cycle
 
-- (instancetype)initWithTestnet:(BOOL)testnet {
-    return [self initWithTestnet:testnet apiKey:nil];
+- (instancetype)initWithChainId:(ChainId)chainId {
+    return [self initWithChainId:chainId apiKey:nil];
 }
 
-- (instancetype)initWithTestnet:(BOOL)testnet apiKey:(NSString *)apiKey {
-    self = [super initWithTestnet:testnet];
+- (instancetype)initWithChainId:(ChainId)chainId apiKey:(NSString *)apiKey {
+    switch (chainId) {
+        case ChainIdHomestead:
+            _host = @"api.etherscan.io";
+            break;
+        case ChainIdKovan:
+            _host = @"kovan.etherscan.io";
+            break;
+        case ChainIdRinkeby:
+            _host = @"rinkeby.etherscan.io";
+            break;
+        case ChainIdRopsten:
+            _host = @"ropsten.etherscan.io";
+            break;
+        default:
+            break;
+    }
+    
+    // If we don't have a host, Etherscan doesn't support that network
+    if (!_host) { return nil; }
+    
+    self = [super initWithChainId:chainId];
     if (self) {
         _apiKey = apiKey;
         [self doPoll];
@@ -133,9 +154,8 @@ NSString* queryifyTransaction(Transaction *transaction) {
 #pragma mark - Calling
 
 - (NSURL*)urlForPath: (NSString*)path {
-    NSString *host = (self.testnet ? @"ropsten.etherscan.io": @"api.etherscan.io");
     NSString *apiKey = (_apiKey ? [NSString stringWithFormat:@"&apikey=%@", _apiKey]: @"");
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@%@%@", host, path, apiKey]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@%@%@", _host, path, apiKey]];
 }
 
 - (NSURL*)urlForProxyAction: (NSString*)action {
@@ -393,7 +413,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
 #pragma mark - NSObject
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<EtherscanProvider testnet=%@ apiKey=%@>", (self.testnet ? @"YES": @"NO"), _apiKey];
+    return [NSString stringWithFormat:@"<EtherscanProvider chainId=%d apiKey=%@>", self.chainId, _apiKey];
 }
 
 @end

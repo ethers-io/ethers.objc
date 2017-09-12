@@ -7,10 +7,14 @@
     NSUInteger _requestCount;
 }
 
+/*
 + (Provider*)jsonRpcProviderWithTestnet: (BOOL)testnet {
-    return [[JsonRpcProvider alloc] initWithTestnet:testnet url:[NSURL URLWithString:@"https://rpc.ethapi.org"]];
+    // This provider is not supported... Maybe in the future?
+    return nil;
+    //return [[JsonRpcProvider alloc] initWithTestnet:testnet url:[NSURL URLWithString:@"https://rpc.ethapi.org"]];
 }
-
+ */
+/*
 - (id)promiseFetch:(NSURL *)url body:(NSData *)body fetchType:(ApiProviderFetchType)fetchType process:(NSObject *(^)(NSData *))process {
     
     // Prevent testnet
@@ -22,7 +26,7 @@
     
     return [self promiseFetch:url body:body fetchType:fetchType process:process];
 }
-
+*/
 // Etherscan returns balance as a number, which means we cannot use it (as underflow may have occurred)
 //- (void)getBalance: (Address*)address callback: (void (^)(BigNumber *balance, NSError *NSError))callback {
 //}
@@ -47,6 +51,7 @@
     }];
 }
 */
+/*
 - (id)promiseFetch: (NSURL*)url fetchType: (ApiProviderFetchType)fetchType process: (NSObject* (^)(NSObject*))process {
     return [self promiseFetchJSON:url body:nil fetchType:fetchType process:^NSObject*(NSDictionary *response) {
         if (![[response objectForKey:@"status"] isEqual:@(1)]) {
@@ -68,7 +73,7 @@
                     fetchType:ApiProviderFetchTypeIntegerDecimal
                       process:processResponse];
 }
-
+*/
 /*
  Thins like "value" will be NSNumber, but well outside the range of a uint64
 - (ArrayPromise*)getTransactions:(Address *)address startBlockTag:(BlockTag)blockTag {

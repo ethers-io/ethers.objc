@@ -27,15 +27,39 @@
 
 @implementation InfuraProvider
 
-- (instancetype)initWithTestnet:(BOOL)testnet {
-    return [self initWithTestnet:testnet accessToken:nil];
+- (instancetype)initWithChainId:(ChainId)chainId {
+    return [self initWithChainId:chainId accessToken:nil];
 }
 
-- (instancetype)initWithTestnet:(BOOL)testnet accessToken: (NSString*)accessToken {
+- (instancetype)initWithChainId:(ChainId)chainId accessToken:(NSString *)accessToken {
+    
+    NSString *host = nil;
+    switch (chainId) {
+        case ChainIdHomestead:
+            host = @"mainnet.infura.io";
+            break;
+        case ChainIdKovan:
+            host = @"kovan.infura.io";
+            break;
+        case ChainIdRinkeby:
+            host = @"rinkeby.infura.io";
+            break;
+        case ChainIdRopsten:
+            host = @"ropsten.infura.io";
+            break;
+        default:
+            break;
+    }
+    
+    // Any other host is not supported
+    if (!host) { return nil; }
+    
     NSString *accessTokenValue = accessToken;
     if (!accessToken) { accessTokenValue = @""; }
-    NSString *url = [NSString stringWithFormat:@"https://%@.infura.io/%@", (testnet ? @"ropsten": @"mainnet"), accessTokenValue];
-    self = [super initWithTestnet:testnet url:[NSURL URLWithString:url]];
+    
+    NSString *url = [NSString stringWithFormat:@"https://%@/%@", host, accessTokenValue];
+    
+    self = [super initWithChainId:chainId url:[NSURL URLWithString:url]];
     if (self) {
         _accessToken = accessToken;
     }
@@ -43,7 +67,7 @@
 }
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<InfuraProvider testnet=%@ accessToken=%@>", (self.testnet ? @"YES": @"NO"), _accessToken];
+    return [NSString stringWithFormat:@"<InfuraProvider chainId=%d accessToken=%@>", self.chainId, _accessToken];
 }
 
 @end

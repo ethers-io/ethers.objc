@@ -40,8 +40,8 @@
     NSArray<Provider*> *_orderedProviders;
 }
 
-- (instancetype)initWithTestnet:(BOOL)testnet {
-    self = [super initWithTestnet:testnet];
+- (instancetype)initWithChainId:(ChainId)chainId {
+    self = [super initWithChainId:chainId];
     if (self) {
         _orderedProviders = [NSArray array];
     }
@@ -61,7 +61,7 @@
 }
 
 - (BOOL)addProvider: (Provider*)provider {
-    if (provider.testnet != self.testnet) { return NO; }
+    if (provider.chainId != self.chainId) { return NO; }
     
     @synchronized (self) {
         NSMutableArray *mutableArray = [_orderedProviders mutableCopy];

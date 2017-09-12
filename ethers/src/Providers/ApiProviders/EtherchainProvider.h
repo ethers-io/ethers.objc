@@ -11,6 +11,6 @@
 
 @interface EtherchainProvider : ApiProvider
 
-+ (Provider*)jsonRpcProviderWithTestnet: (BOOL)testnet;
++ (Provider*)jsonRpcProviderWithChainId: (ChainId)chainId;
 
 @end
