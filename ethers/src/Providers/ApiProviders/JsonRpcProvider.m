@@ -220,29 +220,6 @@
                   fetchType:ApiProviderFetchTypeBlockInfo];
 }
 
-/*
-- (ArrayPromise*)getTransactions:(Address *)address startBlockTag:(BlockTag)blockTag {
-    NSObject *blockTagName = getBlockTag(blockTag);
-    if (!address || !blockTagName) {
-        return [ArrayPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorInvalidParameters userInfo:@{}]];
-    }
-    
-    NSDictionary *object = @{
-                             @"fromBlock": @"0x0",
-                             @"toBlock": @"latest",
-                             @"toAddress": @[address.checksumAddress],
-                             };
-
-    ArrayPromise *result = [self sendMethod:@"trace_filter" params:@[object] fetchType:ApiProviderFetchTypeArray];
-    
-    [result onCompletion:^(ArrayPromise *promise) {
-        NSLog(@"HERE: %@ %@", promise.value, promise.error);
-    }];
-    
-    return result;
-}
- */
-
 - (TransactionInfoPromise*)getTransaction:(Hash *)transactionHash {
     if (!transactionHash) {
         return [TransactionInfoPromise rejected:[NSError errorWithDomain:ProviderErrorDomain code:ProviderErrorInvalidParameters userInfo:@{}]];
@@ -267,7 +244,7 @@
 #pragma mark - NSObject
 
 - (NSString*)description {
-    return [NSString stringWithFormat:@"<JsonRpcProvider chainId=%@ url=%@>", self.chainId, _url];
+    return [NSString stringWithFormat:@"<JsonRpcProvider chainId=%d url=%@>", self.chainId, _url];
 }
 
 @end

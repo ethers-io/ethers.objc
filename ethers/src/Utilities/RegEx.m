@@ -35,7 +35,7 @@
         NSError *error = nil;
         _regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&error];
         if (error) {
-            NSLog(@"Error: %@", error);
+            NSLog(@"RegEx: Error creating pattern /%@/ - %@", pattern, error);
             return nil;
         }
     }
