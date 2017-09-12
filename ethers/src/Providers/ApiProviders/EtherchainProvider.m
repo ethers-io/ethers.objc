@@ -7,13 +7,13 @@
     NSUInteger _requestCount;
 }
 
-/*
+
 + (Provider*)jsonRpcProviderWithTestnet: (BOOL)testnet {
     // This provider is not supported... Maybe in the future?
     return nil;
     //return [[JsonRpcProvider alloc] initWithTestnet:testnet url:[NSURL URLWithString:@"https://rpc.ethapi.org"]];
 }
- */
+
 /*
 - (id)promiseFetch:(NSURL *)url body:(NSData *)body fetchType:(ApiProviderFetchType)fetchType process:(NSObject *(^)(NSData *))process {
     
