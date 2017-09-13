@@ -52,6 +52,7 @@ NSString *chainName(ChainId chainId) {
         case ChainIdMorden:     return @"morden";
         case ChainIdRopsten:    return @"ropsten";
         case ChainIdRinkeby:    return @"rinkeby";
+        case ChainIdKovan:      return @"kovan";
         default:
             break;
     }
