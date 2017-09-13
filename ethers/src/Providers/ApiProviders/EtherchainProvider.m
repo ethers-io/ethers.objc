@@ -8,7 +8,7 @@
 }
 
 
-+ (Provider*)jsonRpcProviderWithTestnet: (BOOL)testnet {
++ (Provider*)jsonRpcProviderWithChainId:(ChainId)chainId {
     // This provider is not supported... Maybe in the future?
     return nil;
     //return [[JsonRpcProvider alloc] initWithTestnet:testnet url:[NSURL URLWithString:@"https://rpc.ethapi.org"]];
