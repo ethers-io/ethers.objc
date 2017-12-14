@@ -123,4 +123,50 @@
     }
 }
 
+- (void)testSigningMessages {
+    NSArray *tests = @[
+                      // See: https://etherscan.io/verifySig/57
+                      @{
+                          @"address": @"0x14791697260E4c9A71f18484C9f997B308e59325",
+                          @"name": @"string('hello world')",
+                          @"message": @"0x68656c6c6f20776f726c64",
+                          @"privateKey": @"0x0123456789012345678901234567890123456789012345678901234567890123",
+                          @"signature": @"0xddd0a7290af9526056b4e35a077b9a11b513aa0028ec6c9880948544508f3c63265e99e47ad31bb2cab9646c504576b3abc6939a1710afc08cbf3034d73214b81c"
+                          },
+                      
+                      // See: https://github.com/ethers-io/ethers.js/issues/80
+                      @{
+                          @"address": @"0xD351c7c627ad5531Edb9587f4150CaF393c33E87",
+                          @"name": @"bytes(0x47173285...4cb01fad)",
+                          @"message": @"0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad",
+                          @"privateKey": @"0x51d1d6047622bca92272d36b297799ecc152dc2ef91b229debf84fc41e8c73ee",
+                          @"signature": @"0x546f0c996fa4cfbf2b68fd413bfb477f05e44e66545d7782d87d52305831cd055fc9943e513297d0f6755ad1590a5476bf7d1761d4f9dc07dfe473824bbdec751b"
+                          },
+                      
+                      // See: https://github.com/ethers-io/ethers.js/issues/85
+                      @{
+                          @"address": @"0xe7deA7e64B62d1Ca52f1716f29cd27d4FE28e3e1",
+                          @"name": @"zero-prefixed signature",
+                          @"message": @"0x69aff0e8e6bad68d84a1edb4175a4396d5a78d4d8b9d17e08034e2785bc8d2d7",
+                          @"privateKey": @"0x09a11afa58d6014843fd2c5fd4e21e7fadf96ca2d8ce9934af6b8e204314f25c",
+                          @"signature": @"0x7222038446034a0425b6e3f0cc3594f0d979c656206408f937c37a8180bb1bea047d061e4ded4aeac77fa86eb02d42ba7250964ac3eb9da1337090258ce798491c"
+                          }
+                      ];
+
+    for (NSDictionary *test in tests) {
+        NSData *privateKey = [SecureData hexStringToData:[test objectForKey:@"privateKey"]];
+        NSData *message = [SecureData hexStringToData:[test objectForKey:@"message"]];
+        Address *addressExpected = [Address addressWithString:[test objectForKey:@"address"]];
+        Signature *signatureExpected = [Signature signatureWithData:[SecureData hexStringToData:[test objectForKey:@"signature"]]];
+        
+        Account *account = [Account accountWithPrivateKey:privateKey];
+        Signature *signature = [account signMessage:message];
+        XCTAssertEqualObjects(signatureExpected, signature, @"Copmputed signature matches");
+        
+        Address *verified = [Account verifyMessage:message signature:signature];
+        XCTAssertEqualObjects(addressExpected, verified, @"Comnputed address matches");
+        NSLog(@"Account: %@ %@ %@", account, addressExpected, verified);
+    }
+}
+
 @end

@@ -613,6 +613,43 @@ static NSDateFormatter *TimeFormatter = nil;
     return [Signature signatureWithData:signatureData.data v:pby];
 }
 
+static NSString *MessagePrefix = @"Ethereum Signed Message:\n%d";
+
++ (NSData*)messageDigest: (NSData*)message {
+    NSString *prefix = [NSString stringWithFormat:MessagePrefix, (int)message.length];
+    NSData *prefixData = [prefix dataUsingEncoding:NSUTF8StringEncoding];
+    
+    SecureData *data = [SecureData secureDataWithCapacity:(1 + prefixData.length + message.length)];
+    [data appendByte:0x19];
+    [data appendData:prefixData];
+    [data appendData:message];
+    return [data KECCAK256].data;
+}
+
+- (Signature*)signMessage:(NSData *)message {
+    return [self signDigest:[Account messageDigest:message]];
+}
+
++ (Address*)verifyMessage:(NSData *)message signature:(Signature *)signature {
+
+    NSData *digest = [Account messageDigest:message];
+
+    SecureData *signatureData = [SecureData secureDataWithCapacity:64];
+    [signatureData appendData:signature.r];
+    [signatureData appendData:signature.s];
+    
+    char v = signature.v;
+
+    SecureData *publicKey = [SecureData secureDataWithLength:65];
+
+    int failed = ecdsa_verify_digest_recover(&secp256k1, publicKey.mutableBytes, signatureData.bytes, digest.bytes, v);
+    if (failed) {
+        return nil;
+    }
+    
+    return [Address addressWithData:[[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data];
+}
+
 - (void)sign: (Transaction*)transaction {
     [transaction sign:self];
 }
