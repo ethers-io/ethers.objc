@@ -58,6 +58,11 @@
 - (NSComparisonResult)compare: (id)other;
 - (BOOL)isEqual:(id)object;
 
+- (BOOL)lessThan: (BigNumber*)other;
+- (BOOL)lessThanEqualTo: (BigNumber*)other;
+- (BOOL)greaterThan: (BigNumber*)other;
+- (BOOL)greaterThanEqualTo: (BigNumber*)other;
+
 @property (nonatomic, readonly) NSString *decimalString;
 @property (nonatomic, readonly) NSString *hexString;
 @property (nonatomic, readonly) NSString *base36String;

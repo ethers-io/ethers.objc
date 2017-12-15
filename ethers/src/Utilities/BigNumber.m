@@ -299,6 +299,28 @@ static RegEx *RegexHex = nil;
     return [SecureData hexStringToData:[self hexString]];
 }
 
+#pragma mark - More intuitive inequalities
+
+- (BOOL)lessThan: (BigNumber*)other {
+    int result = mp_cmp(&_bigNumber, [((BigNumber*)other) _bigNumber]);
+    return (result == MP_LT);
+}
+
+- (BOOL)lessThanEqualTo: (BigNumber*)other {
+    int result = mp_cmp(&_bigNumber, [((BigNumber*)other) _bigNumber]);
+    return (result == MP_EQ || result == MP_LT);
+}
+
+- (BOOL)greaterThan: (BigNumber*)other {
+    int result = mp_cmp(&_bigNumber, [((BigNumber*)other) _bigNumber]);
+    return (result == MP_GT);
+}
+
+- (BOOL)greaterThanEqualTo: (BigNumber*)other {
+    int result = mp_cmp(&_bigNumber, [((BigNumber*)other) _bigNumber]);
+    return (result == MP_EQ || result == MP_GT);
+}
+
 #pragma mark - NSObject goodness
 
 - (instancetype)copy {
