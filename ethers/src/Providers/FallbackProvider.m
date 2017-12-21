@@ -157,7 +157,9 @@
             Provider *provider = [providers objectAtIndex:index];
             [startCallback(provider) onCompletion:^(Promise *childPromise) {
                 if (childPromise.error) {
-                    //NSLog(@"Fallback: error=%@ provider=%@", childPromise.error, provider);
+                    if (childPromise.error.code != ProviderErrorNotImplemented) {
+                        NSLog(@"FallbackProvider: error=%@ provider=%@", childPromise.error, provider);
+                    }
                     if (index + 1 < providers.count) {
                         nextProvider(index + 1, nextProvider);
                     } else {
