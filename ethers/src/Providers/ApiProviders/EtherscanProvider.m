@@ -27,6 +27,7 @@
 
 #import "Account.h"
 #import "SecureData.h"
+#import "Utilities.h"
 
 
 #pragma mark - Notifications
@@ -42,10 +43,10 @@ NSString* queryifyTransaction(Transaction *transaction) {
     
     NSString *query = [NSString stringWithFormat:@"&to=%@", transaction.toAddress];
     if (![transaction.gasPrice isZero]) {
-        query = [query stringByAppendingFormat:@"&gasPrice=%@", [transaction.gasPrice hexString]];
+        query = [query stringByAppendingFormat:@"&gasPrice=%@", stripHexZeros([transaction.gasPrice hexString])];
     }
     if (![transaction.gasLimit isZero]) {
-        query = [query stringByAppendingFormat:@"&gas=%@", [transaction.gasLimit hexString]];
+        query = [query stringByAppendingFormat:@"&gas=%@", stripHexZeros([transaction.gasLimit hexString])];
     }
     if (transaction.fromAddress) {
         query = [query stringByAppendingFormat:@"&from=%@", transaction.fromAddress];
@@ -54,7 +55,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
         query = [query stringByAppendingFormat:@"&data=%@", [SecureData dataToHexString:transaction.data]];
     }
     if (![transaction.value isZero]) {
-        query = [query stringByAppendingFormat:@"&value=%@", [transaction.value hexString]];
+        query = [query stringByAppendingFormat:@"&value=%@", stripHexZeros([transaction.value hexString])];
     }
     
     return query;
@@ -278,7 +279,7 @@ NSString* queryifyTransaction(Transaction *transaction) {
 
 - (HashPromise*)getStorageAt:(Address *)address position:(BigNumber *)position {
     NSString *action = [NSString stringWithFormat:@"action=eth_getStorageAt&address=%@&position=%@",
-                        address.checksumAddress, [position hexString]];
+                        address.checksumAddress, stripHexZeros([position hexString])];
     return [self promiseFetchProxyAction:action fetchType:ApiProviderFetchTypeHash];
 }
 
