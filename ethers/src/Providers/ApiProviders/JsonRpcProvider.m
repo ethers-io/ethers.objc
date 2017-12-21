@@ -157,7 +157,7 @@
     }
     
     return [self sendMethod:@"eth_getCode"
-                     params:@[ address.checksumAddress ]
+                     params:@[ address.checksumAddress, @"latest" ]
                   fetchType:ApiProviderFetchTypeData];
 }
 
@@ -185,7 +185,7 @@
     }
 
     return [self sendMethod:@"eth_estimateGas"
-                     params:@[ transactionObject(transaction), @"latest" ]
+                     params:@[ transactionObject(transaction) ]
                   fetchType:ApiProviderFetchTypeBigNumberHexString];
 }
 
