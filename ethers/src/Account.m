@@ -420,7 +420,12 @@ static NSDateFormatter *TimeFormatter = nil;
         }
         
         dispatch_async(dispatch_get_main_queue(), ^() {
-            callback(account, nil);
+            // Cancelled after derfivation completed but before we responded (on the main thread)
+            if (stop) {
+                sendError(kAccountErrorCancelled, @"Cancelled");
+            } else {
+                callback(account, nil);
+            }
         });
     });
     
@@ -648,6 +653,27 @@ static NSString *MessagePrefix = @"Ethereum Signed Message:\n%d";
     }
     
     return [Address addressWithData:[[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data];
+}
+
++ (Signature*)signatureWithMessage: (NSData*)message r: (NSData*)r s: (NSData*)s address: (Address*)address {
+    NSData *digest = [Account messageDigest:message];
+
+    SecureData *publicKey = [SecureData secureDataWithLength:65];
+
+    SecureData *signatureData = [SecureData secureDataWithCapacity:64];
+    [signatureData appendData:r];
+    [signatureData appendData:s];
+
+    for (uint8_t recid = 0; recid <= 3; recid++) {
+        int failed = ecdsa_verify_digest_recover(&secp256k1, publicKey.mutableBytes, signatureData.bytes, digest.bytes, recid);
+        if (failed) { continue; }
+        Address *addr = [Address addressWithData:[[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data];
+        if ([address isEqualToAddress:addr]) {
+            return [Signature signatureWithData:signatureData.data v:recid];
+        }
+    }
+    
+    return nil;
 }
 
 - (void)sign: (Transaction*)transaction {

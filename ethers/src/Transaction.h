@@ -84,7 +84,9 @@ extern NSString * _Nullable chainName(ChainId chainId);
 - (nonnull NSData*)serialize;
 
 - (nonnull NSData*)unsignedSerialize;
-- (void)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s;
+
+- (BOOL)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s address: (nonnull Address*)address;
+
 
 @property (nonatomic, readonly, nullable) Hash *transactionHash;
 

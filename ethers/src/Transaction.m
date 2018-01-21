@@ -362,8 +362,8 @@ static NSData *NullData = nil;
     return [RLPSerialization dataWithObject:raw error:nil];
 }
 
-- (void)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s {
-    NSMutableData *publicKey = [NSMutableData dataWithLength:65];
+- (BOOL)populateSignatureWithR: (nonnull NSData*)r s: (nonnull NSData*)s address:(nonnull Address *)address {
+    SecureData *publicKey = [SecureData secureDataWithLength:65];
     
     NSMutableData *sig = [r mutableCopy];
     [sig appendData:s];
@@ -373,10 +373,16 @@ static NSData *NullData = nil;
     for (uint8_t recid = 0; recid <= 3; recid++) {
         int failed = ecdsa_verify_digest_recover(&secp256k1, publicKey.mutableBytes, sig.bytes, digest.bytes, recid);
         if (!failed) {
-            _signature = [Signature signatureWithData:[NSData dataWithData:sig] v:recid];
-            return;
+            Address *fromAddress = [Address addressWithData:[[[publicKey subdataFromIndex:1] KECCAK256] subdataFromIndex:12].data];
+            if ([fromAddress isEqualToAddress:address]) {
+                _signature = [Signature signatureWithData:[NSData dataWithData:sig] v:recid];
+                _fromAddress = fromAddress;
+                return YES;
+            }
         }
     }
+    
+    return NO;
 }
 
 - (Hash*)transactionHash {
