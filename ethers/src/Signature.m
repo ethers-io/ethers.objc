@@ -29,7 +29,7 @@
 
 @implementation Signature
 
-- (instancetype)initWithR: (NSData*)r s: (NSData*)s v: (char)v {
+- (instancetype)initWithR: (NSData*)r s: (NSData*)s v: (int)v {
     if (r.length != 32 || s.length != 32) { return nil; }
     self = [super init];
     if (self) {
@@ -40,7 +40,7 @@
     return self;
 }
 
-- (instancetype)initWithData: (NSData*)data v: (char)v {
+- (instancetype)initWithData: (NSData*)data v: (int)v {
     if (data.length != 64) { return nil; }
     
     return [self initWithR:[data subdataWithRange:NSMakeRange(0, 32)]
@@ -48,7 +48,7 @@
                          v:v];
 }
 
-+ (instancetype)signatureWithData: (NSData*)data v:(char)v {
++ (instancetype)signatureWithData: (NSData*)data v:(int)v {
     return [[Signature alloc] initWithData:data v:v];
 }
 

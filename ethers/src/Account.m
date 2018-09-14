@@ -113,7 +113,7 @@ NSData *ensureDataLength(NSString *hexString, NSUInteger length) {
 
 @interface Signature (private)
 
-+ (instancetype)signatureWithData: (NSData*)data v: (char)v;
++ (instancetype)signatureWithData: (NSData*)data v: (int)v;
 
 @end
 

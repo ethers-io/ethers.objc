@@ -31,6 +31,6 @@
 
 @property (nonatomic, readonly) NSData* r;
 @property (nonatomic, readonly) NSData* s;
-@property (nonatomic, readonly) char v;
+@property (nonatomic, readonly) int v;
 
 @end
