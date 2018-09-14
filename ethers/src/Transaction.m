@@ -42,9 +42,8 @@ static NSData *stripDataZeros(NSData *data) {
     return [data subdataWithRange:NSMakeRange(offset, data.length - offset)];
 }
 
-static NSData *dataWithByte(int value) {
+static NSData *dataWithByte(int value,bool isLocalValue) {
     int tmpValue = CFSwapInt32(value);
-    BOOL isLocalValue = chainName(value);
     return [NSMutableData dataWithBytes:isLocalValue ? &value : &tmpValue length:isLocalValue ? 1 : sizeof(tmpValue)];
 }
 
@@ -235,7 +234,7 @@ static NSData *NullData = nil;
     if (account) {
         NSMutableArray *raw = [self _packBasic];
         if (_chainId) {
-            [raw addObject:dataWithByte(_chainId)];
+            [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
             [raw addObject:NullData];
             [raw addObject:NullData];
         }
@@ -262,7 +261,7 @@ static NSData *NullData = nil;
     
     NSMutableArray *raw = [self _packBasic];
     if (_chainId) {
-        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
@@ -339,12 +338,12 @@ static NSData *NullData = nil;
     if (_signature) {
         int v = 27 + self.signature.v;
         if (_chainId) { v += _chainId * 2 + 8; }
-        [raw addObject:dataWithByte(v)];
+        [raw addObject:dataWithByte(v,chainName(_chainId))];
         [raw addObject:stripDataZeros(self.signature.r)];
         [raw addObject:stripDataZeros(self.signature.s)];
 
     } else {
-        [raw addObject:dataWithByte(_chainId ? _chainId: 28)];
+        [raw addObject:dataWithByte(_chainId ? _chainId: 28,_chainId?chainName(_chainId):true)];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
@@ -356,7 +355,7 @@ static NSData *NullData = nil;
     NSMutableArray *raw = [self _packBasic];
 
     if (_chainId) {
-        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
