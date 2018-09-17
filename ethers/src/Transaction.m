@@ -343,7 +343,7 @@ static NSData *NullData = nil;
         [raw addObject:stripDataZeros(self.signature.s)];
 
     } else {
-        [raw addObject:dataWithByte(_chainId ? _chainId: 28,_chainId?chainName(_chainId):true)];
+        [raw addObject:dataWithByte(_chainId ? _chainId: 28,_chainId?(chainName(_chainId)!=nil):true)];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
