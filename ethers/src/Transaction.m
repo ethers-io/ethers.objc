@@ -42,8 +42,9 @@ static NSData *stripDataZeros(NSData *data) {
     return [data subdataWithRange:NSMakeRange(offset, data.length - offset)];
 }
 
-static NSData *dataWithByte(unsigned char value) {
-    return [NSMutableData dataWithBytes:&value length:1];
+static NSData *dataWithByte(int value,bool isLocalValue) {
+    int tmpValue = CFSwapInt32(value);
+    return [NSMutableData dataWithBytes:isLocalValue ? &value : &tmpValue length:isLocalValue ? 1 : sizeof(tmpValue)];
 }
 
 NSString *chainName(ChainId chainId) {
@@ -67,7 +68,7 @@ static NSData *NullData = nil;
 
 @interface Signature (private)
 
-+ (instancetype)signatureWithData: (NSData*)data v: (char)v;
++ (instancetype)signatureWithData: (NSData*)data v: (int)v;
 
 @end
 
@@ -173,7 +174,7 @@ static NSData *NullData = nil;
         NSData *vObject = [raw objectAtIndex:6];
         if (vObject.length > 1) { return nil; }
         
-        unsigned char v = 0;
+        int v = 0;
         if (vObject.length == 1) {
             [vObject getBytes:&v range:NSMakeRange(0, 1)];
         }
@@ -233,7 +234,7 @@ static NSData *NullData = nil;
     if (account) {
         NSMutableArray *raw = [self _packBasic];
         if (_chainId) {
-            [raw addObject:dataWithByte(_chainId)];
+            [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
             [raw addObject:NullData];
             [raw addObject:NullData];
         }
@@ -249,7 +250,7 @@ static NSData *NullData = nil;
     }
 }
 
-- (void)verifySignatureData: (NSData*)signatureData v: (unsigned char)v {
+- (void)verifySignatureData: (NSData*)signatureData v: (int)v {
     _signature = [Signature signatureWithData:signatureData v:v];
 
     // Use an int so we can detect underflow
@@ -260,7 +261,7 @@ static NSData *NullData = nil;
     
     NSMutableArray *raw = [self _packBasic];
     if (_chainId) {
-        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
@@ -335,14 +336,14 @@ static NSData *NullData = nil;
     NSMutableArray *raw = [self _packBasic];
 
     if (_signature) {
-        uint8_t v = 27 + self.signature.v;
+        int v = 27 + self.signature.v;
         if (_chainId) { v += _chainId * 2 + 8; }
-        [raw addObject:dataWithByte(v)];
+        [raw addObject:dataWithByte(v,chainName(_chainId))];
         [raw addObject:stripDataZeros(self.signature.r)];
         [raw addObject:stripDataZeros(self.signature.s)];
 
     } else {
-        [raw addObject:dataWithByte(_chainId ? _chainId: 28)];
+        [raw addObject:dataWithByte(_chainId ? _chainId: 28,_chainId?(chainName(_chainId)!=nil):true)];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }
@@ -354,7 +355,7 @@ static NSData *NullData = nil;
     NSMutableArray *raw = [self _packBasic];
 
     if (_chainId) {
-        [raw addObject:dataWithByte(_chainId)];
+        [raw addObject:dataWithByte(_chainId,chainName(_chainId))];
         [raw addObject:NullData];
         [raw addObject:NullData];
     }

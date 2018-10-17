@@ -45,13 +45,13 @@
  *  See: https://github.com/ethereum/EIPs/issues/155
  */
 
-typedef NS_OPTIONS(unsigned char, ChainId)  {
-    ChianIdAny          = 0x00,
-    ChainIdHomestead    = 0x01,
-    ChainIdMorden       = 0x02,
-    ChainIdRopsten      = 0x03,
-    ChainIdRinkeby      = 0x04,
-    ChainIdKovan        = 0x2a,
+typedef NS_OPTIONS(int, ChainId)  {
+    ChianIdAny          = 0,
+    ChainIdHomestead    = 1,
+    ChainIdMorden       = 2,
+    ChainIdRopsten      = 3,
+    ChainIdRinkeby      = 4,
+    ChainIdKovan        = 42,
 };
 
 extern NSString * _Nullable chainName(ChainId chainId);
