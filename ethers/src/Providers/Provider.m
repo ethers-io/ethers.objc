@@ -240,9 +240,9 @@ static NSString *UserAgent = nil;
 - (Address*)getEnsAddress {
     switch (self.chainId) {
         case ChainIdHomestead:
-            return [Address addressWithString:@"0x314159265dd8dbb310642f98f50c066173c1259b"];
+            return [Address addressWithString:@"0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"];
         case ChainIdRopsten:
-            return [Address addressWithString:@"0x112234455c3a32fd11230c42e7bccd4a84e02010"];
+            return [Address addressWithString:@"0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"];
         default:
             break;
     }
